@@ -1,9 +1,7 @@
 FROM python:3.11-slim
 
-# Cài đặt các thư viện hệ thống cần thiết cho OpenCV và pdflatex
+# Cài đặt các thư viện hệ thống cần thiết cho pdflatex
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libgl1-mesa-glx \
-    libglib2.0-0 \
     texlive-latex-base \
     texlive-fonts-recommended \
     texlive-latex-extra \
