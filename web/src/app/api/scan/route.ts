@@ -16,6 +16,8 @@ export async function POST(req: Request) {
     try {
         const formData = await req.formData();
         const files = formData.getAll('files') as File[];
+        const studentName = formData.get('studentName') as string || '';
+        const studentDob = formData.get('studentDob') as string || '';
         
         if (!files || files.length === 0) {
             return NextResponse.json({ error: 'Missing files' }, { status: 400 });
@@ -81,13 +83,24 @@ export async function POST(req: Request) {
         
         const tenantId = 'tenant_1'; // Mock tenant for MVP
         
+        // 1. Tạo student
+        const studentId = uuidv4();
+        await supabase.from('students').insert({
+            id: studentId,
+            tenant_id: tenantId,
+            full_name: studentName || 'Chưa nhập tên',
+            dob: studentDob
+        });
+        
+        // 2. Tạo mslq_results
         const { error: dbError } = await supabase
             .from('mslq_results')
             .insert({
                 id: resultId,
                 tenant_id: tenantId,
+                student_id: studentId,
                 answers_jsonb: data.answers,
-                raw_image_url: JSON.stringify(fileUrls), // Lưu mảng các link ảnh gốc
+                photo_url: JSON.stringify(fileUrls), // Lưu mảng các link ảnh gốc
                 status: 'review'
             });
 

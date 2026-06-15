@@ -6,6 +6,8 @@ import { UploadCloud, FileImage, Loader2, AlertCircle } from 'lucide-react';
 
 export default function Home() {
   const [files, setFiles] = useState<File[]>([]);
+  const [studentName, setStudentName] = useState('');
+  const [studentDob, setStudentDob] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
@@ -25,6 +27,8 @@ export default function Home() {
     try {
       const formData = new FormData();
       files.forEach(f => formData.append('files', f));
+      formData.append('studentName', studentName);
+      formData.append('studentDob', studentDob);
 
       const res = await fetch('/api/scan', {
         method: 'POST',
@@ -96,6 +100,30 @@ export default function Home() {
               />
             </label>
 
+            {/* Thông tin học sinh */}
+            <div className="flex gap-3">
+              <div className="flex-1">
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Họ và tên</label>
+                <input 
+                  type="text" 
+                  value={studentName}
+                  onChange={(e) => setStudentName(e.target.value)}
+                  placeholder="VD: Nguyễn Văn A"
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all text-slate-800 placeholder:text-slate-400"
+                />
+              </div>
+              <div className="w-1/3">
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Năm sinh</label>
+                <input 
+                  type="text" 
+                  value={studentDob}
+                  onChange={(e) => setStudentDob(e.target.value)}
+                  placeholder="VD: 2008"
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all text-slate-800 placeholder:text-slate-400"
+                />
+              </div>
+            </div>
+
             {error && (
               <div className="p-4 bg-red-50 rounded-xl flex gap-3 text-red-700 text-sm items-start">
                 <AlertCircle className="w-5 h-5 shrink-0" />
@@ -106,11 +134,11 @@ export default function Home() {
             {/* Action */}
             <button
               onClick={handleUpload}
-              disabled={files.length === 0 || loading}
+              disabled={files.length === 0 || !studentName || !studentDob || loading}
               className={`
                 w-full py-3.5 px-4 rounded-xl text-white font-semibold flex items-center justify-center gap-2
                 transition-all duration-200
-                ${files.length === 0 || loading ? 'bg-slate-300 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0'}
+                ${files.length === 0 || !studentName || !studentDob || loading ? 'bg-slate-300 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0'}
               `}
             >
               {loading ? (
