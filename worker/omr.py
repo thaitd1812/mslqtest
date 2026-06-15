@@ -116,11 +116,23 @@ def process_omr_opencv(image_path):
 
 async def process_omr_gemini_async(jpeg_images: list[bytes]):
     print(f"[OMR] Using Gemini Vision for {len(jpeg_images)} images...")
-    api_key = os.getenv("GEMINI_API_KEY")
-    if not api_key:
-        raise ValueError("GEMINI_API_KEY is not set in environment")
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key={api_key}"
     
+    api_keys = []
+    for i in range(1, 4):
+        k = os.getenv(f"GEMINI_API_KEY_{i}")
+        if k:
+            api_keys.append(k)
+            
+    # Fallback back to standard GEMINI_API_KEY if none of the numbered ones exist
+    if not api_keys:
+        k = os.getenv("GEMINI_API_KEY")
+        if k:
+            api_keys.append(k)
+            
+    if not api_keys:
+        print("[OMR] Error: No GEMINI_API_KEY found")
+        return False, []
+        
     parts = [{"text": "This is a student motivation survey OMR. Read the selected bubble (from 1 to 5) for each question. The questions are numbered 1 to 44. Return ONLY a JSON array of objects with 'q' for question number and 'v' for the selected value. Example: [{\"q\": 1, \"v\": 4}, {\"q\": 2, \"v\": 1}]. If there are multiple pages, read them all sequentially."}]
     
     for img_bytes in jpeg_images:
@@ -133,28 +145,33 @@ async def process_omr_gemini_async(jpeg_images: list[bytes]):
     
     max_retries = 3
     for attempt in range(max_retries):
-        try:
-            async with httpx.AsyncClient(timeout=30.0) as client:
-                resp = await client.post(url, json=payload)
-                if resp.status_code == 429:
-                    print(f"[OMR] Rate limited. Retrying {attempt+1}/{max_retries} in 2 seconds...")
-                    await asyncio.sleep(2)
-                    continue
-                resp.raise_for_status()
-                res_data = resp.json()
-                text_res = res_data['candidates'][0]['content']['parts'][0]['text']
-                
-                # Extract JSON block
-                if "```json" in text_res:
-                    text_res = text_res.split("```json")[1].split("```")[0]
-                elif "```" in text_res:
-                    text_res = text_res.split("```")[1].split("```")[0]
+        for key_idx, api_key in enumerate(api_keys):
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key={api_key}"
+            try:
+                async with httpx.AsyncClient(timeout=30.0) as client:
+                    resp = await client.post(url, json=payload)
+                    if resp.status_code == 429:
+                        print(f"[OMR] Rate limited on Key {key_idx + 1}. Switching to next key...")
+                        continue
+                    resp.raise_for_status()
+                    res_data = resp.json()
+                    text_res = res_data['candidates'][0]['content']['parts'][0]['text']
                     
-                answers = json.loads(text_res.strip())
-                return True, answers
-        except Exception as e:
-            print(f"[OMR] Gemini API error: {e}")
-            await asyncio.sleep(2)
+                    # Extract JSON block
+                    if "```json" in text_res:
+                        text_res = text_res.split("```json")[1].split("```")[0]
+                    elif "```" in text_res:
+                        text_res = text_res.split("```")[1].split("```")[0]
+                        
+                    answers = json.loads(text_res.strip())
+                    return True, answers
+            except Exception as e:
+                print(f"[OMR] Gemini API error with Key {key_idx + 1}: {e}")
+                continue # Try the next key
+                
+        # If all keys failed for this attempt, wait and retry the loop
+        print(f"[OMR] All keys failed or rate-limited on attempt {attempt+1}/{max_retries}. Waiting 2s...")
+        await asyncio.sleep(2)
             
     return False, []
 
