@@ -145,7 +145,7 @@
 
 ## 9. Luồng người dùng
 
-1. Chụp/upload → nén WebP tại client → đẩy thẳng Supabase Storage (pre-signed URL).
+1. Chụp/upload → **Nhập "Họ và tên" & "Năm sinh" (để chèn thẳng vào báo cáo in)** → nén WebP tại client → đẩy thẳng Supabase Storage.
 2. `POST /api/scan` → worker `/omr` → lưu `mslq_results(status=review)`.
 3. **Màn đối soát**: trái ảnh gốc (zoom/pan) · phải 44 radio; chỉ dòng cờ đỏ nổi bật + ảnh cắt dòng. (Tùy chọn) bấm "AI phân xử" → `/api/gemini`.
 4. Bấm **"Chốt"** → `/api/finalize`: `score.ts` chấm → tạo payload → worker `/render` → PDF → Storage → `status=done`.
