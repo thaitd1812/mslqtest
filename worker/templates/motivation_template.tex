@@ -26,6 +26,7 @@
 \usepackage{fancyhdr}
 \usepackage{array}
 \usepackage{tabularx}
+\usepackage{xltabular}
 \usepackage{colortbl}
 \usepackage[most]{tcolorbox}
 \usepackage{setspace}\setstretch{1.04}
@@ -37,8 +38,8 @@
 \usepackage{eso-pic}
 
 % List dùng chung: gọn, bullet màu brand, căn sát mép trên ô
-\setlist[itemize]{leftmargin=13pt, topsep=0pt, partopsep=0pt, parsep=0pt,
-  itemsep=2.5pt, before=\vspace{-0.5\baselineskip},
+\setlist[itemize]{leftmargin=*, topsep=0pt, partopsep=0pt, parsep=0pt,
+  itemsep=2.5pt,
   label=\textcolor{brand}{\small\textbullet}}
 
 % --- WATERMARK + KHUNG VIỀN 4 GÓC ---
@@ -125,14 +126,15 @@ __THUC_TRANG_ROWS__
 \subh{2.1}{Tổng quan}
 
 \renewcommand{\arraystretch}{1.2}
-\begin{tabularx}{\linewidth}{|>{\RaggedRight}p{3.5cm}|X|}
+\begin{xltabular}{\linewidth}{|>{\RaggedRight}p{3.5cm}|X|}
 \hline
 \rowcolor{brand!10}
 \multicolumn{1}{|c|}{\thx{Nội dung}} & \multicolumn{1}{c|}{\thx{Chi tiết}} \\ \hline
+\endhead
 \textbf{Điểm tốt} & __DIEM_TOT__ \\ \hline
 \textbf{Điểm cần cải thiện} & __DIEM_CAI_THIEN__ \\ \hline
 \textbf{Nhận xét chung} & __NHAN_XET_CHUNG__ \\ \hline
-\end{tabularx}
+\end{xltabular}
 \vspace{8pt}
 
 % ===================== III. ĐỀ XUẤT =====================
@@ -140,12 +142,13 @@ __THUC_TRANG_ROWS__
 \subh{3.1}{Lộ trình học}
 
 \renewcommand{\arraystretch}{1.2}
-\begin{tabularx}{\linewidth}{|>{\RaggedRight}p{3.3cm}|X|}
+\begin{xltabular}{\linewidth}{|>{\RaggedRight}p{3.3cm}|X|}
 \hline
 \rowcolor{brand!10}
 \multicolumn{1}{|c|}{\thx{Giai đoạn}} & \multicolumn{1}{c|}{\thx{Nội dung}} \\ \hline
+\endhead
 __LO_TRINH_ROWS__
-\end{tabularx}
+\end{xltabular}
 \vspace{7pt}
 
 \subh{3.2}{Khuyến nghị cho phụ huynh}
