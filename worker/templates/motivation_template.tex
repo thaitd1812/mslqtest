@@ -1,0 +1,191 @@
+\documentclass[12pt, a4paper]{article}
+\usepackage[a4paper,top=0.78in,bottom=1.45in,left=0.75in,right=0.75in,headsep=6pt,footskip=18pt]{geometry}
+\setlength{\headheight}{30pt}
+
+% --- FONT (serif body + sans heading, đúng design language MathTech) ---
+\usepackage{fontspec}
+\setmainfont{Lora}[
+    Path = __FONT_PATH__,
+    Extension = .ttf,
+    UprightFont = *-Regular,
+    BoldFont = *-Bold,
+    ItalicFont = *-Italic,
+    BoldItalicFont = *-BoldItalic
+]
+\newfontfamily\hf{BeVietnamPro}[
+    Path = __FONT_PATH__,
+    Extension = .ttf,
+    UprightFont = *-Regular,
+    BoldFont = *-Bold,
+    ItalicFont = *-Italic,
+    BoldItalicFont = *-BoldItalic
+]
+
+% --- MÀU SẮC ---
+\usepackage{xcolor}
+\definecolor{ink}{HTML}{1B1B2A}
+\definecolor{brand}{HTML}{C0392B}
+\definecolor{neutral}{HTML}{F7F4F2}
+\definecolor{rule}{HTML}{E1E4EA}
+\definecolor{muted}{HTML}{6B7280}
+\definecolor{lvlgood}{HTML}{1E8E5A} % Tốt / Áp lực thấp  (xanh lá)
+\definecolor{lvlok}{HTML}{2D6CDF}   % Khá / Trung bình   (xanh dương)
+\definecolor{lvlwarn}{HTML}{E08A1E} % Cần hỗ trợ / cao   (cam)
+\definecolor{lvlbad}{HTML}{C0392B}  % Ưu tiên / rất cao  (đỏ)
+\color{ink}
+
+% --- PACKAGES ---
+\usepackage{enumitem}
+\usepackage{ragged2e}
+\usepackage{fancyhdr}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{xltabular}
+\usepackage{colortbl}
+\usepackage[most]{tcolorbox}
+\usepackage{setspace}\setstretch{1.15}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{4pt}
+\usepackage{tikz}
+\usetikzlibrary{calc}
+\usepackage[colorlinks=true,linkcolor=brand,urlcolor=brand]{hyperref}
+\usepackage{eso-pic}
+
+% List dùng chung: gọn, bullet màu brand, căn sát mép trên ô
+\setlist[itemize]{leftmargin=18pt, topsep=4pt, partopsep=0pt, parsep=2pt,
+  itemsep=6pt, before=\vspace{0pt},
+  label=\textcolor{brand}{\small\textbullet}}
+
+% --- WATERMARK + KHUNG VIỀN 4 GÓC ---
+\AddToShipoutPictureBG{%
+\begin{tikzpicture}[remember picture,overlay]
+  \node[rotate=60,opacity=1.0] at (current page.center) {\includegraphics[scale=1.2]{../Watermark_Opacity_20.png}};
+  \draw[line width=0.5pt,color=rule]
+    ([xshift=8mm,yshift=-8mm]current page.north west) rectangle ([xshift=-8mm,yshift=8mm]current page.south east);
+  \draw[line width=1.5pt,color=brand] ([xshift=8.5mm,yshift=-8.5mm]current page.north west) -- ([xshift=18mm,yshift=-8.5mm]current page.north west);
+  \draw[line width=1.5pt,color=brand] ([xshift=8.5mm,yshift=-8.5mm]current page.north west) -- ([xshift=8.5mm,yshift=-18mm]current page.north west);
+  \draw[line width=1.5pt,color=brand] ([xshift=-8.5mm,yshift=-8.5mm]current page.north east) -- ([xshift=-18mm,yshift=-8.5mm]current page.north east);
+  \draw[line width=1.5pt,color=brand] ([xshift=-8.5mm,yshift=-8.5mm]current page.north east) -- ([xshift=-8.5mm,yshift=-18mm]current page.north east);
+  \draw[line width=1.5pt,color=brand] ([xshift=8.5mm,yshift=8.5mm]current page.south west) -- ([xshift=18mm,yshift=8.5mm]current page.south west);
+  \draw[line width=1.5pt,color=brand] ([xshift=8.5mm,yshift=8.5mm]current page.south west) -- ([xshift=8.5mm,yshift=18mm]current page.south west);
+  \draw[line width=1.5pt,color=brand] ([xshift=-8.5mm,yshift=8.5mm]current page.south east) -- ([xshift=-18mm,yshift=8.5mm]current page.south east);
+  \draw[line width=1.5pt,color=brand] ([xshift=-8.5mm,yshift=8.5mm]current page.south east) -- ([xshift=-8.5mm,yshift=18mm]current page.south east);
+\end{tikzpicture}%
+}
+
+% --- HEADER / FOOTER ---
+\pagestyle{fancy}\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{1.0pt}
+\fancyhead[L]{\includegraphics[scale=0.30]{../Logo4.png}}
+\fancyhead[R]{\raisebox{6pt}{\hf\small\itshape\color{muted}Báo cáo đánh giá động lực \& chiến lược học tập}}
+\fancyfoot[L]{\hf\footnotesize {\textbf{\color{brand}{CÔNG TY CỔ PHẦN GIÁO DỤC VÀ CÔNG NGHỆ MATHTECH}}\\[3pt]
+Hotline: Kim Giang: 0986.482.343 ~|~ Minh Khai: 0917.551.881 ~|~ Long Biên: 0941.201.881\\[1.5pt]
+\phantom{Hotline: }Mỹ Đình: 0911.301.881 ~|~ Hà Đông: 0886.541.881 ~|~ Hoàng Cầu: 0946.201.881\\[3pt]
+Website: \href{http://www.mathtech.vn}{\underline{www.mathtech.vn}}\hfill Trang~\thepage}}
+\fancyfoot[R]{}
+\futurelet\TMPfootrule\def\footrule{{\color{brand}\TMPfootrule}}
+
+% --- TIỆN ÍCH GIAO DIỆN ---
+% Pill nhãn mức:  \pill{lvlok}{Khá}
+\newcommand{\pill}[2]{\tikz[baseline=(p.base)]{\node[fill=#1,text=white,rounded corners=2.5pt,inner xsep=5pt,inner ysep=1.6pt,font=\hf\bfseries\scriptsize](p){#2};}}
+% Tiêu đề mục lớn:  \sect{I}{THỰC TRẠNG}
+\newcommand{\sect}[2]{%
+  \vspace{7pt}\par\noindent
+  {\hf\bfseries\large\tikz[baseline=(s.base)]{\node[fill=brand,text=white,rounded corners=2pt,inner xsep=6pt,inner ysep=2pt](s){#1};}~~\textcolor{ink}{#2}}\par\vspace{1pt}%
+  {\color{brand!70}\rule{\linewidth}{0.9pt}}\par\vspace{4pt}%
+}
+% Tiêu đề mục con:  \subh{2.1}{Tổng quan}
+\newcommand{\subh}[2]{\vspace{1pt}{\hf\bfseries\color{brand}#1.}~{\hf\bfseries\color{ink}#2}\par\vspace{2pt}}
+% Header ô bảng
+\newcommand{\thx}[1]{\hf\bfseries\color{ink}#1}
+
+\newcolumntype{C}[1]{>{\centering\arraybackslash}p{#1}}
+
+\begin{document}
+
+% ===================== TIÊU ĐỀ =====================
+\begin{center}
+  {\hf\bfseries\large\color{brand}BÁO CÁO ĐÁNH GIÁ ĐỘNG LỰC VÀ CHIẾN LƯỢC HỌC TẬP}
+\end{center}
+\vspace{4pt}
+
+% ===================== THÔNG TIN HỌC SINH =====================
+\begin{tcolorbox}[enhanced, colback=neutral, colframe=brand!35, boxrule=0.6pt, arc=3pt,
+  left=12pt, right=12pt, top=10pt, bottom=10pt, before skip=2pt, after skip=6pt]
+\begin{tabular}{@{}p{0.5\linewidth} p{0.5\linewidth}@{}}
+{\hf\footnotesize\color{muted}HỌ VÀ TÊN}\quad{\large\textbf{__STUDENT_NAME__}} &
+{\hf\footnotesize\color{muted}NĂM SINH}\quad{\large\textbf{__STUDENT_DOB__}}
+\end{tabular}\\[6pt]
+{\hf\footnotesize\color{muted}BÀI ĐÁNH GIÁ}\quad MSLQ - Motivated Strategies for Learning Questionnaire
+\end{tcolorbox}
+
+% ===================== I. THỰC TRẠNG =====================
+\sect{I}{THỰC TRẠNG}
+Đánh giá động lực và chiến lược học tập của học sinh dựa trên thang đo trong bài trắc nghiệm:
+\vspace{4pt}
+
+\arrayrulecolor{rule}
+\renewcommand{\arraystretch}{1.35}
+\begin{tabularx}{\linewidth}{|>{\RaggedRight}p{5.8cm}|C{2.6cm}|X|}
+\hline
+\rowcolor{brand!10}
+\thx{Nhóm đánh giá} & \centering\thx{Điểm tối đa} & \thx{Điểm học sinh} \\ \hline
+__THUC_TRANG_ROWS__
+\end{tabularx}
+\vspace{8pt}
+
+% ===================== II. ĐÁNH GIÁ =====================
+\sect{II}{ĐÁNH GIÁ}
+\subh{2.1}{Tổng quan}
+
+\arrayrulecolor{rule}
+\renewcommand{\arraystretch}{1.2}
+\begin{xltabular}{\linewidth}{|>{\RaggedRight}p{4.0cm}|X|}
+\hline
+\rowcolor{brand!10}
+\thx{Nội dung} & \thx{Chi tiết} \\ \hline
+\endfirsthead
+\hline
+\rowcolor{brand!10}
+\thx{Nội dung} & \thx{Chi tiết} \\ \hline
+\endhead
+\textbf{Điểm tốt} & __DIEM_TOT__ \\ \hline
+\textbf{Điểm cần cải thiện} & __DIEM_CAI_THIEN__ \\ \hline
+\textbf{Nhận xét chung} & __NHAN_XET_CHUNG__ \\ \hline
+\end{xltabular}
+\vspace{8pt}
+
+% ===================== III. ĐỀ XUẤT =====================
+\sect{III}{ĐỀ XUẤT PHƯƠNG ÁN CẢI THIỆN}
+\subh{3.1}{Lộ trình học}
+
+\arrayrulecolor{rule}
+\renewcommand{\arraystretch}{1.2}
+\begin{xltabular}{\linewidth}{|>{\RaggedRight}p{3.5cm}|X|}
+\hline
+\rowcolor{brand!10}
+\thx{Giai đoạn} & \thx{Nội dung} \\ \hline
+\endfirsthead
+\hline
+\rowcolor{brand!10}
+\thx{Giai đoạn} & \thx{Nội dung} \\ \hline
+\endhead
+__LO_TRINH_ROWS__
+\end{xltabular}
+\vspace{7pt}
+
+\subh{3.2}{Khuyến nghị cho phụ huynh}
+Phụ huynh nên đồng hành với con bằng cách:
+__KHUYEN_NGHI_PH__
+
+\vspace{10pt}
+\begin{flushright}
+\begin{minipage}{6.5cm}
+\centering
+{\hf\bfseries GIÁO VIÊN ĐÁNH GIÁ}\\
+\textit{(ký và ghi rõ họ tên)}\\[1.4cm]
+\end{minipage}
+\end{flushright}
+
+\end{document}
