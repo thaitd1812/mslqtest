@@ -1,12 +1,14 @@
 FROM python:3.11-slim
 
 # Cài đặt các thư viện hệ thống cần thiết cho pdflatex
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN echo "ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true" | debconf-set-selections && \
+    apt-get update && apt-get install -y --no-install-recommends \
     texlive-latex-base \
     texlive-fonts-recommended \
     texlive-latex-extra \
     texlive-lang-english \
     texlive-xetex \
+    ttf-mscorefonts-installer \
     wget \
     && rm -rf /var/lib/apt/lists/*
 
