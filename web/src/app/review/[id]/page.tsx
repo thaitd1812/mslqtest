@@ -16,6 +16,7 @@ export default function ReviewPage() {
     const [loading, setLoading] = useState(true);
     const [isFinalizing, setIsFinalizing] = useState(false);
     const [imageUrls, setImageUrls] = useState<string[]>([]);
+    const [studentInfo, setStudentInfo] = useState<{name: string, dob: string} | null>(null);
 
     useEffect(() => {
         if (!id) return;
@@ -38,6 +39,13 @@ export default function ReviewPage() {
                         setImageUrls([data.photo_url]);
                     }
                 }
+                
+                if (data.omr_meta_jsonb) {
+                    setStudentInfo({
+                        name: data.omr_meta_jsonb.studentName || "Chưa có tên",
+                        dob: data.omr_meta_jsonb.studentDob || "Chưa có"
+                    });
+                }
             } else {
                 console.error("Fetch error", error);
             }
@@ -55,7 +63,8 @@ export default function ReviewPage() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     result_id: id,
-                    answers: rawAnswers
+                    answers: rawAnswers,
+                    studentInfo: studentInfo
                 })
             });
             const data = await res.json();

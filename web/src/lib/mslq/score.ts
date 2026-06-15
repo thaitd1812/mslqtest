@@ -231,15 +231,13 @@ function _thucTrangRows(results: GroupResult[]): string {
     }).join("\n");
 }
 
-function _bulletList(items: string[], inTable: boolean = false): string {
+function _bulletList(items: string[]): string {
     const out = [];
-    if (inTable) out.push("\\vspace{-12pt}");
     out.push("\\begin{itemize}");
     for (const it of items) {
         out.push("  \\item " + texEscape(it));
     }
     out.push("\\end{itemize}");
-    if (inTable) out.push("\\vspace{-12pt}");
     return out.join("\n");
 }
 
@@ -254,10 +252,10 @@ export function buildReportPayload(studentInfo: {name?: string, dob?: string}, r
         "__STUDENT_NAME__": texEscape(studentInfo.name || ""),
         "__STUDENT_DOB__": texEscape(studentInfo.dob || ""),
         "__THUC_TRANG_ROWS__": _thucTrangRows(results),
-        "__DIEM_TOT__": _bulletList(buildStrengths(results), true),
-        "__DIEM_CAI_THIEN__": _bulletList(buildImprovements(results), true),
+        "__DIEM_TOT__": _bulletList(buildStrengths(results)),
+        "__DIEM_CAI_THIEN__": _bulletList(buildImprovements(results)),
         "__NHAN_XET_CHUNG__": texEscape(buildOverallComment(results)),
         "__LO_TRINH_ROWS__": _loTrinhRows(buildRoadmap(results)),
-        "__KHUYEN_NGHI_PH__": _bulletList(buildParentAdvice(results), false),
+        "__KHUYEN_NGHI_PH__": _bulletList(buildParentAdvice(results)),
     };
 }
