@@ -8,6 +8,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     texlive-lang-english \
     texlive-xetex \
     fonts-liberation \
+    fontconfig \
     wget \
     && fc-cache -fv \
     && rm -rf /var/lib/apt/lists/*
