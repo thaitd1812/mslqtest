@@ -83,23 +83,14 @@ export async function POST(req: Request) {
         
         const tenantId = 'tenant_1'; // Mock tenant for MVP
         
-        // 1. Tạo student
-        const studentId = uuidv4();
-        await supabase.from('students').insert({
-            id: studentId,
-            tenant_id: tenantId,
-            full_name: studentName || 'Chưa nhập tên',
-            dob: studentDob
-        });
-        
         // 2. Tạo mslq_results
         const { error: dbError } = await supabase
             .from('mslq_results')
             .insert({
                 id: resultId,
                 tenant_id: tenantId,
-                student_id: studentId,
                 answers_jsonb: data.answers,
+                omr_meta_jsonb: { studentName: studentName || 'Chưa nhập tên', studentDob },
                 photo_url: JSON.stringify(fileUrls), // Lưu mảng các link ảnh gốc
                 status: 'review'
             });
