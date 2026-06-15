@@ -4,22 +4,8 @@
 
 % --- FONT (serif body + sans heading, đúng design language MathTech) ---
 \usepackage{fontspec}
-\setmainfont{Lora}[
-    Path = __FONT_PATH__,
-    Extension = .ttf,
-    UprightFont = *-Regular,
-    BoldFont = *-Bold,
-    ItalicFont = *-Italic,
-    BoldItalicFont = *-BoldItalic
-]
-\newfontfamily\hf{BeVietnamPro}[
-    Path = __FONT_PATH__,
-    Extension = .ttf,
-    UprightFont = *-Regular,
-    BoldFont = *-Bold,
-    ItalicFont = *-Italic,
-    BoldItalicFont = *-BoldItalic
-]
+\setmainfont{Times New Roman}
+\newfontfamily\hf{Avenir Next}      % heading / nhãn / pill
 
 % --- MÀU SẮC ---
 \usepackage{xcolor}
@@ -40,20 +26,19 @@
 \usepackage{fancyhdr}
 \usepackage{array}
 \usepackage{tabularx}
-\usepackage{xltabular}
 \usepackage{colortbl}
 \usepackage[most]{tcolorbox}
-\usepackage{setspace}\setstretch{1.15}
+\usepackage{setspace}\setstretch{1.04}
 \setlength{\parindent}{0pt}
-\setlength{\parskip}{4pt}
+\setlength{\parskip}{3pt}
 \usepackage{tikz}
 \usetikzlibrary{calc}
 \usepackage[colorlinks=true,linkcolor=brand,urlcolor=brand]{hyperref}
 \usepackage{eso-pic}
 
 % List dùng chung: gọn, bullet màu brand, căn sát mép trên ô
-\setlist[itemize]{leftmargin=18pt, topsep=4pt, partopsep=0pt, parsep=2pt,
-  itemsep=6pt, before=\vspace{0pt},
+\setlist[itemize]{leftmargin=13pt, topsep=0pt, partopsep=0pt, parsep=0pt,
+  itemsep=2.5pt, before=\vspace{-0.5\baselineskip},
   label=\textcolor{brand}{\small\textbullet}}
 
 % --- WATERMARK + KHUNG VIỀN 4 GÓC ---
@@ -77,7 +62,8 @@
 \pagestyle{fancy}\fancyhf{}
 \renewcommand{\headrulewidth}{0pt}
 \renewcommand{\footrulewidth}{1.0pt}
-\fancyhead[L]{\includegraphics[width=\textwidth]{../Logo4.png}}
+\fancyhead[L]{\includegraphics[scale=0.30]{../Logo4.png}}
+\fancyhead[R]{\raisebox{6pt}{\hf\small\itshape\color{muted}Báo cáo đánh giá động lực \& chiến lược học tập}}
 \fancyfoot[L]{\hf\footnotesize {\textbf{\color{brand}{CÔNG TY CỔ PHẦN GIÁO DỤC VÀ CÔNG NGHỆ MATHTECH}}\\[3pt]
 Hotline: Kim Giang: 0986.482.343 ~|~ Minh Khai: 0917.551.881 ~|~ Long Biên: 0941.201.881\\[1.5pt]
 \phantom{Hotline: }Mỹ Đình: 0911.301.881 ~|~ Hà Đông: 0886.541.881 ~|~ Hoàng Cầu: 0946.201.881\\[3pt]
@@ -104,25 +90,29 @@ Website: \href{http://www.mathtech.vn}{\underline{www.mathtech.vn}}\hfill Trang~
 \begin{document}
 
 % ===================== TIÊU ĐỀ =====================
-\vspace*{10pt}
 \begin{center}
-  \textbf{\large BÁO CÁO ĐÁNH GIÁ ĐỘNG LỰC VÀ CHIẾN LƯỢC HỌC TẬP}
+  {\hf\bfseries\large\color{brand}BÁO CÁO ĐÁNH GIÁ ĐỘNG LỰC VÀ CHIẾN LƯỢC HỌC TẬP}
 \end{center}
-\vspace{12pt}
+\vspace{4pt}
 
 % ===================== THÔNG TIN HỌC SINH =====================
-{\hf\footnotesize\color{muted}HỌ VÀ TÊN}\quad\rule[-2pt]{5.5cm}{0.5pt} \hfill {\hf\footnotesize\color{muted}NĂM SINH}\quad\rule[-2pt]{2.5cm}{0.5pt}\\
-Bài đánh giá: MSLQ - Motivated Strategies for Learning Questionnaire
-\vspace{12pt}
+\begin{tcolorbox}[enhanced, colback=neutral, colframe=brand!35, boxrule=0.6pt, arc=3pt,
+  left=12pt, right=12pt, top=6pt, bottom=6pt, before skip=2pt, after skip=4pt]
+\setlength{\parskip}{2pt}
+\begin{tabularx}{\linewidth}{@{}p{8.2cm}X@{}}
+{\hf\footnotesize\color{muted}HỌ VÀ TÊN}\quad\textbf{__STUDENT_NAME__} &
+{\hf\footnotesize\color{muted}NĂM SINH}\quad\textbf{__STUDENT_DOB__}
+\end{tabularx}\\[2pt]
+{\hf\footnotesize\color{muted}BÀI ĐÁNH GIÁ}\quad MSLQ - Motivated Strategies for Learning Questionnaire
+\end{tcolorbox}
 
 % ===================== I. THỰC TRẠNG =====================
 \sect{I}{THỰC TRẠNG}
 Đánh giá động lực và chiến lược học tập của học sinh dựa trên thang đo trong bài trắc nghiệm:
 \vspace{4pt}
 
-\arrayrulecolor{rule}
-\renewcommand{\arraystretch}{1.35}
-\begin{tabularx}{\linewidth}{|>{\RaggedRight}p{5.8cm}|C{2.6cm}|X|}
+\renewcommand{\arraystretch}{1.25}
+\begin{tabularx}{\linewidth}{|>{\RaggedRight}p{5.2cm}|C{2.0cm}|X|}
 \hline
 \rowcolor{brand!10}
 \thx{Nhóm đánh giá} & \centering\thx{Điểm tối đa} & \thx{Điểm học sinh} \\ \hline
@@ -134,40 +124,28 @@ __THUC_TRANG_ROWS__
 \sect{II}{ĐÁNH GIÁ}
 \subh{2.1}{Tổng quan}
 
-\arrayrulecolor{rule}
 \renewcommand{\arraystretch}{1.2}
-\begin{xltabular}{\linewidth}{|>{\RaggedRight}p{4.0cm}|X|}
+\begin{tabularx}{\linewidth}{|>{\RaggedRight}p{3.5cm}|X|}
 \hline
 \rowcolor{brand!10}
-\thx{Nội dung} & \thx{Chi tiết} \\ \hline
-\endfirsthead
-\hline
-\rowcolor{brand!10}
-\thx{Nội dung} & \thx{Chi tiết} \\ \hline
-\endhead
+\multicolumn{1}{|c|}{\thx{Nội dung}} & \multicolumn{1}{c|}{\thx{Chi tiết}} \\ \hline
 \textbf{Điểm tốt} & __DIEM_TOT__ \\ \hline
 \textbf{Điểm cần cải thiện} & __DIEM_CAI_THIEN__ \\ \hline
 \textbf{Nhận xét chung} & __NHAN_XET_CHUNG__ \\ \hline
-\end{xltabular}
+\end{tabularx}
 \vspace{8pt}
 
 % ===================== III. ĐỀ XUẤT =====================
 \sect{III}{ĐỀ XUẤT PHƯƠNG ÁN CẢI THIỆN}
 \subh{3.1}{Lộ trình học}
 
-\arrayrulecolor{rule}
 \renewcommand{\arraystretch}{1.2}
-\begin{xltabular}{\linewidth}{|>{\RaggedRight}p{3.5cm}|X|}
+\begin{tabularx}{\linewidth}{|>{\RaggedRight}p{3.3cm}|X|}
 \hline
 \rowcolor{brand!10}
-\thx{Giai đoạn} & \thx{Nội dung} \\ \hline
-\endfirsthead
-\hline
-\rowcolor{brand!10}
-\thx{Giai đoạn} & \thx{Nội dung} \\ \hline
-\endhead
+\multicolumn{1}{|c|}{\thx{Giai đoạn}} & \multicolumn{1}{c|}{\thx{Nội dung}} \\ \hline
 __LO_TRINH_ROWS__
-\end{xltabular}
+\end{tabularx}
 \vspace{7pt}
 
 \subh{3.2}{Khuyến nghị cho phụ huynh}
