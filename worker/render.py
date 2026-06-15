@@ -24,8 +24,8 @@ def generate_pdf(placeholders: dict) -> bytes:
         shutil.copytree(os.path.join(base_dir, "assets", "fonts"), os.path.join(tmpdir, "fonts"))
         
         # Copy images into tmpdir
-        shutil.copy(os.path.join(base_dir, "..", "Logo4.png"), tmpdir)
-        shutil.copy(os.path.join(base_dir, "..", "Watermark_Opacity_20.png"), tmpdir)
+        shutil.copy(os.path.join(base_dir, "assets", "images", "Logo4.png"), tmpdir)
+        shutil.copy(os.path.join(base_dir, "assets", "images", "Watermark_Opacity_20.png"), tmpdir)
         
         # Replace placeholders with local paths
         template = template.replace("__FONT_PATH__", "./fonts/")
