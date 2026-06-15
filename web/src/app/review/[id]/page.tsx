@@ -30,12 +30,12 @@ export default function ReviewPage() {
                 mapped.sort((a: any, b: any) => a.cau - b.cau);
                 setAnswers(mapped);
 
-                if (data.raw_image_url) {
+                if (data.photo_url) {
                     try {
-                        const urls = JSON.parse(data.raw_image_url);
+                        const urls = JSON.parse(data.photo_url);
                         setImageUrls(urls);
                     } catch (e) {
-                        setImageUrls([data.raw_image_url]);
+                        setImageUrls([data.photo_url]);
                     }
                 }
             } else {
