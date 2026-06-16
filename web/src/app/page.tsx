@@ -44,9 +44,9 @@ export default function Home() {
       // data.id là ID của mslq_results
       router.push(`/review/${data.id}`);
       
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      setError(err.message);
+      setError(err instanceof Error ? err.message : String(err));
       setLoading(false);
     }
   };

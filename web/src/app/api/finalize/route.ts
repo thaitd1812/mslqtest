@@ -64,7 +64,7 @@ export async function POST(req: Request) {
             pdf_url: data.pdf_url
         });
 
-    } catch (e: any) {
-        return NextResponse.json({ error: e.message }, { status: 500 });
+    } catch (e: unknown) {
+        return NextResponse.json({ error: e instanceof Error ? e.message : String(e) }, { status: 500 });
     }
 }

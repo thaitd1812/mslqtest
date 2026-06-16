@@ -8,11 +8,17 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZvY2p0b3ZzdXBlY3NmcHpxenZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE0OTkxMTMsImV4cCI6MjA5NzA3NTExM30.ZKtQMrF2YDKKMfeTFfbj89rKy9J1TJ2TYNG5_2e9SXI'
 );
 
+interface Answer {
+    cau: number;
+    chon: number;
+    flag: boolean;
+}
+
 export default function ReviewPage() {
     const { id } = useParams();
     const router = useRouter();
     
-    const [answers, setAnswers] = useState<any[]>([]);
+    const [answers, setAnswers] = useState<Answer[]>([]);
     const [loading, setLoading] = useState(true);
     const [isFinalizing, setIsFinalizing] = useState(false);
     const [imageUrls, setImageUrls] = useState<string[]>([]);
@@ -22,20 +28,20 @@ export default function ReviewPage() {
         if (!id) return;
         supabase.from('mslq_results').select('*').eq('id', id).single().then(({data, error}) => {
             if (data && data.answers_jsonb) {
-                const mapped = data.answers_jsonb.map((a: any) => ({
+                const mapped = data.answers_jsonb.map((a: { q: number; v: number }) => ({
                     cau: a.q,
                     chon: a.v,
                     flag: a.v === 3 // if missing/blank, mark as flag
                 }));
                 // Sort by question number
-                mapped.sort((a: any, b: any) => a.cau - b.cau);
+                mapped.sort((a: Answer, b: Answer) => a.cau - b.cau);
                 setAnswers(mapped);
 
                 if (data.photo_url) {
                     try {
                         const urls = JSON.parse(data.photo_url);
                         setImageUrls(urls);
-                    } catch (e) {
+                    } catch {
                         setImageUrls([data.photo_url]);
                     }
                 }
@@ -74,8 +80,8 @@ export default function ReviewPage() {
                 alert('Có lỗi xảy ra: ' + data.error);
                 setIsFinalizing(false);
             }
-        } catch (e: any) {
-            alert('Có lỗi xảy ra: ' + e.message);
+        } catch (e: unknown) {
+            alert('Có lỗi xảy ra: ' + (e instanceof Error ? e.message : String(e)));
             setIsFinalizing(false);
         }
     };
@@ -96,6 +102,7 @@ export default function ReviewPage() {
                                 {url.toLowerCase().endsWith('.pdf') ? (
                                     <iframe src={url} title={`Original file ${idx}`} className="w-full h-full min-h-[800px] border-none" />
                                 ) : (
+                                    /* eslint-disable-next-line @next/next/no-img-element */
                                     <img src={url} alt={`Upload ${idx}`} className="w-full h-auto object-contain" />
                                 )}
                             </div>
