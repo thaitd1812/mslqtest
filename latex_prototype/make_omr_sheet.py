@@ -45,7 +45,7 @@ PREAMBLE = r"""\documentclass[11pt, a4paper]{article}
 \newcolumntype{L}[1]{>{\RaggedRight\arraybackslash}m{#1}}
 
 % Ô tròn to để tô tay (thu nhỏ chút)
-\newcommand{\bub}{\tikz{\draw[line width=0.8pt,color=ink] (0,0) circle (2.2mm);}}
+\newcommand{\bub}{\tikz{\draw[line width=0.8pt,color=ink] (0,0) circle (1.8mm);}}
 % Số có vòng tròn cho legend
 \newcommand{\cnum}[1]{\tikz[baseline=-0.6ex]{\draw[line width=0.7pt,color=ink] (0,0) circle (1.8mm); \node[font=\bfseries\scriptsize]{#1};}}
 
