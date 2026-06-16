@@ -11,6 +11,7 @@
 \color{ink}
 
 \usepackage{array}
+\usepackage{tabularx}
 \usepackage{longtable}
 \usepackage{colortbl}
 \usepackage{ragged2e}
@@ -61,14 +62,27 @@
 \renewcommand{\arraystretch}{1.1}
 \vspace{2pt}
 
-% ===== HƯỚNG DẪN =====
-\noindent{\small \textbf{Đánh giá mức độ đồng tình của con với các phát biểu sau đây về động lực và chiến lược học tập. Con hãy chọn mức độ thể hiện ĐÚNG NHẤT ý kiến của mình ở mỗi dòng, theo thang mức dưới đây:}}
-\par\vspace{4pt}
 
-% ===== LEGEND =====
-\noindent{\footnotesize\textbf{Thang mức:}\hspace{8pt}\cnum{1}~Hoàn toàn không đúng\hfill\cnum{2}~Không đúng\hfill\cnum{3}~Đúng một phần\hfill\cnum{4}~Đúng\hfill\cnum{5}~Hoàn toàn đúng}
-\par\vspace{3pt}
-{\small\textbf{Lưu ý:}~mỗi dòng tô kín đúng \textbf{MỘT} ô tròn bằng bút mực hoặc bút chì đậm.}
+% ===== HƯỚNG DẪN & THANG ĐIỂM =====
+\noindent{\small\textbf{Hình thức thực hiện:} Đánh giá mức độ đồng tình của con với các phát biểu dưới đây về động lực và chiến lược học tập. Con hãy chọn mức độ thể hiện ĐÚNG NHẤT ý kiến của mình ở mỗi dòng, theo thang điểm từ 1 đến 5:}\vspace{4pt}
+
+\newcolumntype{C}{>{\centering\arraybackslash}X}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabularx}{\linewidth}{|C|C|C|C|C|}
+\hline
+\textbf{1} & \textbf{2} & \textbf{3} & \textbf{4} & \textbf{5} \\
+\hline
+\textbf{\small Hoàn toàn không đúng} \newline \textit{\footnotesize (Điều này gần như không giống con chút nào, hầu như chưa bao giờ xảy ra)} &
+\textbf{\small Không đúng} \newline \textit{\footnotesize (Thỉnh thoảng có nhưng nhìn chung không đúng với con)} &
+\textbf{\small Đúng một phần} \newline \textit{\footnotesize (Có lúc đúng, có lúc không; chỉ đúng ở một số trường hợp)} &
+\textbf{\small Đúng} \newline \textit{\footnotesize (Phần lớn thời gian đều đúng với con, chỉ đôi khi mới khác)} &
+\textbf{\small Hoàn toàn đúng với con} \newline \textit{\footnotesize (Rất đúng với con, gần như lúc nào cũng như vậy)} \\
+\hline
+\end{tabularx}
+\renewcommand{\arraystretch}{1.5}
+\vspace{6pt}
+
+{\small\textbf{Lưu ý:}~mỗi dòng chỉ tô kín đúng \textbf{MỘT} ô tròn tương ứng bằng bút mực hoặc bút chì đậm.}
 \vspace{4pt}
 
 % ===== BẢNG =====

@@ -149,79 +149,54 @@ export function buildOverallComment(results: GroupResult[]): string {
     return parts.join(" ");
 }
 
-export function buildRoadmap(results: GroupResult[]): [string, string][] {
-    const byKey = results.reduce((acc, r) => {
-        acc[r.key] = r;
-        return acc;
-    }, {} as Record<string, GroupResult>);
+const NEW_SOLUTIONS: Record<string, {title: string, desc: string}[]> = {
+    "self_efficacy": [
+        { title: "Áp dụng bài toán thực tế (Contextual Learning)", desc: "Tuyệt đối không dạy lý thuyết suông. Bắt đầu buổi học bằng một tình huống thực tế hoặc một nghịch lý đời sống liên quan đến bài học để kích thích sự tò mò (Ví dụ: Dạy về tỷ lệ phần trăm thông qua bài toán tính tiền giảm giá Shopee hoặc lãi suất mua trả góp điện thoại)." },
+        { title: "Cung cấp quyền lựa chọn (Autonomy)", desc: "Cho học sinh quyền tự chọn cách hoàn thành nhiệm vụ khi có thể. Thay vì bắt buộc làm một dạng bài tập duy nhất, cho phép các em chọn làm bài tập cá nhân, làm dự án nhỏ theo nhóm, hoặc thuyết trình giải thích lại bài toán đó." },
+        { title: "Kết nối liên môn", desc: "Chỉ ra mối liên hệ giữa môn học này với các môn học khác mà học sinh thích (ví dụ: Toán học bổ trợ như thế nào cho việc lập trình game hoặc tính toán trong môn Địa lý)." }
+    ],
+    "intrinsic_value": [
+        { title: "Thiết kế trải nghiệm chiến thắng (Mastery Experiences)", desc: "Hạ độ khó của bài tập xuống mức học sinh chắc chắn làm được để tạo “Quick Wins” (chiến thắng nhanh). Cảm giác giải được bài sẽ kích hoạt dopamine, giúp xóa bỏ tâm lý sợ hãi và xây dựng lại sự tự tin từ gốc." },
+        { title: "Chia nhỏ bậc thang kiến thức (Scaffolding)", desc: "Một bài toán lớn gồm 4 bước thì giáo viên hỗ trợ làm 3 bước đầu, để học sinh tự làm bước cuối cùng. Sau đó tăng dần để học sinh tự làm 2 bước, rồi tự làm cả bài." },
+        { title: "Thay đổi cách khen ngợi", desc: "Tuyệt đối không khen “Con thông minh quá“. Hãy khen vào giải pháp và quá trình: “Thầy thấy cách con phân tích sơ đồ ở bước 2 rất logic”, hoặc “Bài này con đã kiên trì thử đến cách giải thứ 3, xuất sắc!“. Điều này giúp hình thành tư duy phát triển (Growth Mindset)." }
+    ],
+    "test_anxiety": [
+        { title: "Giải mẫn cảm bằng thi thử (Desensitization)", desc: "Tổ chức các bài kiểm tra ngắn (Quiz 5–10 phút) không lấy điểm số áp lực, diễn ra thường xuyên để học sinh quen với cảm giác làm bài dưới áp lực thời gian. Giảm bớt sức nặng của điểm số thi học kỳ bằng cách chia nhỏ trọng số điểm sang chuyên cần, bài tập tuần, dự án." },
+        { title: "Huấn luyện kỹ năng phòng thi", desc: "Dạy học sinh chiến thuật làm bài: “Dễ làm trước, khó làm sau; nếu kẹt quá 2 phút ở một câu thì đánh dấu để đó và chuyển câu tiếp theo”." },
+        { title: "Bài tập thở và giải tỏa kiểm soát", desc: "Hướng dẫn kỹ thuật thở bụng (Box Breathing) 4 nhịp trước khi giám thị phát đề để hạ nhịp tim và làm dịu hệ thần kinh thực vật." }
+    ],
+    "cognitive_strategy": [
+        { title: "Dạy phương pháp hệ thống hóa", desc: "Giáo viên không chỉ dạy kiến thức mà phải dạy “Cách học”. Hướng dẫn học sinh cách vẽ sơ đồ tư duy (Mindmap), kẻ bảng so sánh các công thức dễ nhầm lẫn, hoặc cách ghi chép theo phương pháp Cornell." },
+        { title: "Yêu cầu học sinh chủ động xử lý thông tin", desc: "Cuối buổi học, thay vì thầy cô tóm tắt, hãy yêu cầu học sinh: “Hãy tóm tắt lại nội dung hôm nay bằng đúng 3 câu theo ngôn ngữ của con” hoặc “Hãy giảng lại bài toán này cho bạn bên cạnh nghe”. Học bằng cách dạy lại cho người khác (Kỹ thuật Feynman) là cách tốt nhất để phá vỡ thói quen học vẹt." },
+        { title: "Khuyến khích tìm giải pháp thay thế", desc: "Đặt câu hỏi: “Bài này ngoài cách giải của thầy, bạn nào có thể tìm thêm một con đường khác để đi đến kết quả không?“." }
+    ],
+    "self_regulation": [
+        { title: "Kế hoạch hành động trực quan (Action Planning)", desc: "Hướng dẫn học sinh lập danh sách việc cần làm (To-do list) cực kỳ cụ thể cho từng buổi học, thay vì mục tiêu chung chung. Ví dụ: Sửa “Hôm nay học Toán” thành “Hôm nay giải đúng 5 bài tập hình học trang 12 trong vòng 45 phút”." },
+        { title: "Kiểm soát môi trường (Environment Control)", desc: "Hướng dẫn các em thiết lập góc học tập “sạch xao nhãng”: Cất điện thoại sang phòng khác, tắt tivi, dọn sạch bàn học trước khi ngồi vào bàn." },
+        { title: "Dạy kỹ năng tự giám sát (Self-Monitoring)", desc: "Sử dụng các công cụ như đồng hồ đếm ngược Pomodoro (học 25 phút, nghỉ 5 phút) để giúp học sinh tự nhận thức và giới hạn thời gian tập trung của mình, tránh việc ngồi lướt điện thoại vô thức khi gặp bài tập khó." }
+    ]
+};
 
-    const priority = results.filter(r => !r.reversed && r.tier === 0);
-    const support = results.filter(r => !r.reversed && r.tier === 1);
-    const okay = results.filter(r => !r.reversed && r.tier === 2);
-    const anxiety = byKey["test_anxiety"];
-
-    const names = (lst: GroupResult[]) => lst.map(r => r.name.toLowerCase()).join(", ");
-
-    const gd1: string[] = [];
-    if (anxiety.tier >= 2) {
-        gd1.push("Ổn định tâm lý phòng thi: cho con làm các bài kiểm tra ngắn, áp lực thấp, tăng dần độ khó để con quen với cảm giác thi cử và bớt căng thẳng.");
+export function buildKhuyenNghi(results: GroupResult[]): string {
+    const targets = results.filter(r => (!r.reversed && r.tier <= 1) || (r.reversed && r.tier >= 2));
+    
+    if (targets.length === 0) {
+        return "Hiện tại học sinh đang duy trì phong độ rất tốt ở tất cả các khía cạnh. Phụ huynh và giáo viên tiếp tục đồng hành, ghi nhận nỗ lực và khích lệ để con duy trì động lực học tập tích cực này.";
     }
-    if (priority.length > 0) {
-        gd1.push(`Củng cố cấp thiết nhóm ${names(priority)} bằng các nhiệm vụ nhỏ, dễ đạt để con tạo lại 'chiến thắng nhỏ' và lấy lại niềm tin.`);
-    }
-    if (gd1.length === 0) {
-        let target = support[0];
-        if (!target) {
-            const positiveResults = results.filter(r => !r.reversed);
-            target = positiveResults.reduce((prev, curr) => (curr.avg < prev.avg ? curr : prev));
+
+    const out: string[] = [];
+    out.push("\\begin{itemize}");
+    for (const t of targets) {
+        out.push(`  \\item \\textbf{${texEscape(t.name)}}`);
+        out.push("  \\begin{itemize}");
+        const sols = NEW_SOLUTIONS[t.key] || [];
+        for (const sol of sols) {
+            out.push(`    \\item \\textbf{${texEscape(sol.title)}:} ${texEscape(sol.desc)}`);
         }
-        gd1.push(`Rà soát và củng cố nền tảng ở nhóm ${target.name.toLowerCase()}, thiết lập thói quen học đều mỗi ngày.`);
+        out.push("  \\end{itemize}");
     }
-    const gd1Text = "Mục tiêu: " + gd1.join(" ");
-
-    const gd2Targets = support.length > 0 ? support : okay;
-    let gd2Text = "";
-    if (gd2Targets.length > 0) {
-        gd2Text = `Mục tiêu: Trang bị phương pháp học hiệu quả cho nhóm ${names(gd2Targets)}. Hướng dẫn con kỹ năng tóm tắt bài, vẽ sơ đồ, ghi chú lỗi sai và tự đặt câu hỏi kiểm tra mức độ hiểu.`;
-    } else {
-        gd2Text = "Mục tiêu: Duy trì phương pháp học tốt hiện có, bổ sung các kỹ thuật ghi nhớ và liên hệ kiến thức nâng cao.";
-    }
-
-    const gd3Text = "Mục tiêu: Rèn cho con khả năng tự lập kế hoạch, tự đặt mục tiêu và tự đánh giá tiến độ học. Nâng dần các nhóm đang ở mức Khá lên mức Tốt và duy trì thói quen học tập bền vững.";
-
-    return [
-        ["Giai đoạn 1 (Tuần 1-4)", gd1Text],
-        ["Giai đoạn 2 (Tuần 5-8)", gd2Text],
-        ["Giai đoạn 3 (Tuần 9-12)", gd3Text],
-    ];
-}
-
-export function buildParentAdvice(results: GroupResult[]): string[] {
-    const byKey = results.reduce((acc, r) => {
-        acc[r.key] = r;
-        return acc;
-    }, {} as Record<string, GroupResult>);
-
-    const advice: string[] = [];
-    if (byKey["test_anxiety"].tier >= 2) {
-        advice.push("Tránh tạo thêm áp lực điểm số; ghi nhận và động viên nỗ lực của con thay vì chỉ nhìn vào kết quả bài thi.");
-    }
-    if (byKey["self_efficacy"].tier <= 1) {
-        advice.push("Khích lệ con qua những 'chiến thắng nhỏ' hằng ngày để con dần tin vào khả năng của bản thân.");
-    }
-    if (byKey["intrinsic_value"].tier <= 1) {
-        advice.push("Kết nối môn Toán với sở thích và đời sống thực tế để con cảm nhận được ý nghĩa của việc học.");
-    }
-    if (byKey["cognitive_strategy"].tier <= 1) {
-        advice.push("Đồng hành cùng con khi học ở nhà: hướng dẫn con cách tóm tắt bài, lập sơ đồ và ghi lại lỗi sai.");
-    }
-    if (byKey["self_regulation"].tier <= 1) {
-        advice.push("Cùng con lập thời gian biểu và mục tiêu nhỏ mỗi ngày, theo dõi nhẹ nhàng để con hình thành thói quen tự học.");
-    }
-    if (advice.length === 0) {
-        advice.push("Tiếp tục đồng hành, ghi nhận và khích lệ để con duy trì phong độ học tập tích cực hiện tại.");
-    }
-    return advice;
+    out.push("\\end{itemize}");
+    return out.join("\n");
 }
 
 function _thucTrangRows(results: GroupResult[]): string {
@@ -241,12 +216,6 @@ function _bulletList(items: string[]): string {
     return out.join("\n");
 }
 
-function _loTrinhRows(roadmap: [string, string][]): string {
-    return roadmap.map(([name, content]) => {
-        return `\\textbf{${texEscape(name)}} & ${texEscape(content)} \\\\ \\hline`;
-    }).join("\n");
-}
-
 export function buildReportPayload(studentInfo: {name?: string, dob?: string}, results: GroupResult[]): Record<string, string> {
     return {
         "__STUDENT_NAME__": texEscape(studentInfo.name || ""),
@@ -255,7 +224,6 @@ export function buildReportPayload(studentInfo: {name?: string, dob?: string}, r
         "__DIEM_TOT__": _bulletList(buildStrengths(results)),
         "__DIEM_CAI_THIEN__": _bulletList(buildImprovements(results)),
         "__NHAN_XET_CHUNG__": texEscape(buildOverallComment(results)),
-        "__LO_TRINH_ROWS__": _loTrinhRows(buildRoadmap(results)),
-        "__KHUYEN_NGHI_PH__": _bulletList(buildParentAdvice(results)),
+        "__KHUYEN_NGHI__": buildKhuyenNghi(results),
     };
 }
