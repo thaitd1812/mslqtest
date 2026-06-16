@@ -1,0 +1,13 @@
+--- worker/templates/motivation_template.tex
++++ worker/templates/motivation_template.tex
+@@ -20,8 +20,8 @@
+ 
+ % --- FONT (serif body + sans heading, đúng design language MathTech) ---
+ \usepackage{fontspec}
+-\setmainfont{Times New Roman}
+-\newfontfamily\hf{Avenir Next}      % heading / nhãn / pill
++\setmainfont{Times New Roman}
++\newfontfamily\hf{Arial}      % heading / nhãn / pill
+ 
+ % --- COLORS ---
+ \definecolor{brand}{HTML}{1A365D} % Xanh đậm MathTech
