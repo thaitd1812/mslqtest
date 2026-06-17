@@ -59,6 +59,29 @@ export async function POST(req: Request) {
 
         const data = await res.json();
         
+        // 4. Update Database
+        const scores_jsonb: Record<string, number> = {};
+        for (const r of results) {
+            scores_jsonb[r.name] = r.avg;
+        }
+
+        const final_answers_jsonb = answers.map((val: number, idx: number) => ({ q: idx + 1, v: val }));
+
+        const { error: updateError } = await supabase
+            .from('mslq_results')
+            .update({
+                status: 'done',
+                scores_jsonb: scores_jsonb,
+                answers_jsonb: final_answers_jsonb,
+                report_pdf_url: data.pdf_url
+            })
+            .eq('id', result_id);
+
+        if (updateError) {
+            console.error("Database Update Error:", updateError);
+            return NextResponse.json({ error: 'Failed to update database' }, { status: 500 });
+        }
+
         // Return the PDF URL
         return NextResponse.json({
             pdf_url: data.pdf_url
