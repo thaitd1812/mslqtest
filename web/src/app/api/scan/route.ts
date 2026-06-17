@@ -23,10 +23,7 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Missing files' }, { status: 400 });
         }
 
-        const fileUrls: string[] = [];
-        const tempPaths: string[] = [];
-        for (let i = 0; i < files.length; i++) {
-            const file = files[i];
+        const uploadPromises = files.map(async (file, i) => {
             const buffer = Buffer.from(await file.arrayBuffer());
             const safeName = `${Date.now()}_${i}_${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
             
@@ -40,16 +37,22 @@ export async function POST(req: Request) {
 
             if (uploadError) {
                 console.error("Supabase Storage Error:", uploadError);
-                return NextResponse.json({ error: 'Failed to upload to Supabase Storage' }, { status: 500 });
+                throw new Error('Failed to upload to Supabase Storage');
             }
             
             // Lấy public URL
             const { data: publicUrlData } = supabase.storage.from('mslq-uploads').getPublicUrl(safeName);
-            const publicUrl = publicUrlData.publicUrl;
+            return publicUrlData.publicUrl;
+        });
 
-            fileUrls.push(publicUrl);
-            tempPaths.push(publicUrl); // Truyền URL HTTP thật cho Python Worker
+        let fileUrls: string[];
+        try {
+            fileUrls = await Promise.all(uploadPromises);
+        } catch (e) {
+            return NextResponse.json({ error: 'Failed to upload to Supabase Storage' }, { status: 500 });
         }
+        
+        const tempPaths = fileUrls; // Truyền URL HTTP thật cho Python Worker
 
         // Gọi sang python worker
         const res = await fetch(`${WORKER_URL}/omr`, {

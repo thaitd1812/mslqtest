@@ -34,8 +34,8 @@ export default function Home() {
         if (f.type.startsWith('image/') && !f.type.includes('svg') && !f.type.includes('gif')) {
           try {
             const options = {
-              maxSizeMB: 0.8,          // Tối đa 800KB
-              maxWidthOrHeight: 1920,  // Độ phân giải cao cho OMR
+              maxSizeMB: 0.25,         // Ép dung lượng tối đa 250KB mỗi ảnh (tăng tốc độ mạng 3G/4G)
+              maxWidthOrHeight: 1200,  // Giảm từ 1920 xuống 1200 (đủ nét cho AI đọc)
               useWebWorker: true,
             };
             const compressedBlob = await imageCompression(f, options);
