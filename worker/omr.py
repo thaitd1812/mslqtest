@@ -148,7 +148,7 @@ async def process_omr_gemini_async(jpeg_images: list[bytes]):
         for key_idx, api_key in enumerate(api_keys):
             url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key={api_key}"
             try:
-                async with httpx.AsyncClient(timeout=30.0) as client:
+                async with httpx.AsyncClient(timeout=60.0) as client:
                     resp = await client.post(url, json=payload)
                     if resp.status_code == 429:
                         print(f"[OMR] Rate limited on Key {key_idx + 1}. Switching to next key...")
