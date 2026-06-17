@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { UploadCloud, FileImage, Loader2, AlertCircle } from 'lucide-react';
+import imageCompression from 'browser-image-compression';
 
 export default function Home() {
   const [files, setFiles] = useState<File[]>([]);
@@ -26,7 +27,28 @@ export default function Home() {
 
     try {
       const formData = new FormData();
-      files.forEach(f => formData.append('files', f));
+      
+      for (const f of files) {
+        // Nén ảnh nếu là định dạng image
+        if (f.type.startsWith('image/') && !f.type.includes('svg') && !f.type.includes('gif')) {
+          try {
+            const options = {
+              maxSizeMB: 0.8,          // Tối đa 800KB
+              maxWidthOrHeight: 1920,  // Độ phân giải cao cho OMR
+              useWebWorker: true,
+            };
+            const compressedBlob = await imageCompression(f, options);
+            const compressedFile = new File([compressedBlob], f.name, { type: compressedBlob.type });
+            formData.append('files', compressedFile);
+          } catch (error) {
+            console.error("Lỗi nén ảnh:", error);
+            formData.append('files', f); // Fallback: dùng ảnh gốc
+          }
+        } else {
+          formData.append('files', f);
+        }
+      }
+      
       formData.append('studentName', studentName);
       formData.append('studentDob', studentDob);
 
@@ -35,10 +57,21 @@ export default function Home() {
         body: formData,
       });
 
-      const data = await res.json();
+      let data;
+      try {
+        data = await res.json();
+      } catch (parseError) {
+        if (res.status === 413) {
+          throw new Error('Dung lượng ảnh quá lớn (>4.5MB). Vui lòng thử từng ảnh một hoặc giảm dung lượng ảnh.');
+        } else if (res.status === 504) {
+          throw new Error('Hệ thống xử lý quá lâu (Timeout). Vui lòng thử lại.');
+        } else {
+          throw new Error(`Lỗi hệ thống (${res.status}): Không thể đọc dữ liệu trả về từ server.`);
+        }
+      }
       
       if (!res.ok) {
-        throw new Error(data.error || 'Failed to scan image');
+        throw new Error(data?.error || 'Failed to scan image');
       }
 
       // data.id là ID của mslq_results

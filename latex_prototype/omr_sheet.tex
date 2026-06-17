@@ -1,5 +1,5 @@
 \documentclass[11pt, a4paper]{article}
-\usepackage[a4paper,top=0.6in,bottom=0.5in,left=0.6in,right=0.6in,headsep=10pt]{geometry}
+\usepackage[a4paper,top=0.6in,bottom=1.4in,left=0.6in,right=0.6in,headsep=10pt,footskip=70pt]{geometry}
 \setlength{\headheight}{40pt}
 
 \usepackage{fontspec}
@@ -17,18 +17,31 @@
 \usepackage{ragged2e}
 \usepackage{fancyhdr}
 \usepackage{tikz}
+\usepackage{tabularx}
 \setlength{\parindent}{0pt}
 
 \pagestyle{fancy}\fancyhf{}
-\renewcommand{\headrulewidth}{0pt}\renewcommand{\footrulewidth}{0pt}
+\renewcommand{\headrulewidth}{0pt}\renewcommand{\footrulewidth}{0.5pt}
 \fancyhead[L]{\includegraphics[scale=0.36]{../Logo4.png}}
-\fancyhead[R]{\raisebox{16pt}{\footnotesize\color{muted}Trang \thepage}}
+\fancyfoot[C]{%
+  \scriptsize\color{muted}%
+  \begin{minipage}[b]{\linewidth}
+    \textbf{CÔNG TY CỔ PHẦN GIÁO DỤC VÀ CÔNG NGHỆ MATHTECH}\\[3pt]
+    \begin{tabular}[b]{@{}l@{\ }l}
+      Hotline: & Kim Giang: 0986.482.343 | Minh Khai: 0917.551.881 | Long Biên: 0941.201.881 \\
+               & Mỹ Đình: 0911.301.881 | Hà Đông: 0886.541.881 | Hoàng Cầu: 0946.201.881 \\
+               & Nguyễn Thị Định: 0914.641.881 | Định Công: 0914.241.881 \\
+      Website: & \underline{www.mathtech.vn}
+    \end{tabular}\hfill
+    Trang \thepage
+  \end{minipage}%
+}
 
 \newcolumntype{M}[1]{>{\centering\arraybackslash}m{#1}}
 \newcolumntype{L}[1]{>{\RaggedRight\arraybackslash}m{#1}}
 
 % Ô tròn to để tô tay (thu nhỏ chút)
-\newcommand{\bub}{\tikz{\draw[line width=0.8pt,color=ink] (0,0) circle (1.8mm);}}
+\newcommand{\bub}{\tikz[baseline=-0.6ex]{\draw[line width=0.8pt,color=ink] (0,0) circle (1.8mm);}}
 % Số có vòng tròn cho legend
 \newcommand{\cnum}[1]{\tikz[baseline=-0.6ex]{\draw[line width=0.7pt,color=ink] (0,0) circle (1.8mm); \node[font=\bfseries\scriptsize]{#1};}}
 
@@ -51,7 +64,21 @@
 \par\vspace{7pt}
 
 % ===== LEGEND =====
-\noindent{\footnotesize\textbf{Thang mức:}\hspace{8pt}\cnum{1}~Hoàn toàn không đúng\hfill\cnum{2}~Không đúng\hfill\cnum{3}~Đúng một phần\hfill\cnum{4}~Đúng\hfill\cnum{5}~Hoàn toàn đúng}
+\noindent{\footnotesize\textbf{Thang mức:}}
+\par\vspace{4pt}
+\bgroup
+\footnotesize
+\renewcommand{\arraystretch}{1.5}
+\noindent\begin{tabularx}{\linewidth}{|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|}
+\hline
+\textbf{1} & \textbf{2} & \textbf{3} & \textbf{4} & \textbf{5} \\ \hline
+\textbf{Hoàn toàn không đúng}\par \textit{(Điều này gần như không giống con chút nào, hầu như chưa bao giờ xảy ra)} &
+\textbf{Không đúng}\par \textit{(Thỉnh thoảng có nhưng nhìn chung không đúng với con)} &
+\textbf{Đúng một phần}\par \textit{(Có lúc đúng, có lúc không; chỉ đúng ở một số trường hợp.)} &
+\textbf{Đúng}\par \textit{(Phần lớn thời gian đều đúng với con, chỉ đôi khi mới khác)} &
+\textbf{Hoàn toàn đúng với con}\par \textit{(Rất đúng với con, gần như lúc nào cũng như vậy)} \\ \hline
+\end{tabularx}
+\egroup
 \par\vspace{6pt}
 {\small\textbf{Lưu ý:}~mỗi dòng tô kín đúng \textbf{MỘT} ô tròn bằng bút mực hoặc bút chì đậm.}
 \vspace{9pt}

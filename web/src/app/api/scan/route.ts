@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { v4 as uuidv4 } from 'uuid';
 
+export const maxDuration = 60; // Allow max 60s execution time on Vercel
+
 const WORKER_URL = process.env.WORKER_URL || 'http://localhost:8000';
 const WORKER_SECRET = process.env.WORKER_SECRET || 'dev_secret';
 
