@@ -189,9 +189,9 @@ export default function Home() {
 
         {/* Footer Link to Dashboard */}
         <div className="bg-slate-50 border-t border-slate-100 p-4 text-center">
-          <Link href="/dashboard" className="text-sm font-medium text-indigo-600 hover:text-indigo-800 transition-colors inline-flex items-center gap-1.5">
+          <a href="/dashboard" className="text-sm font-medium text-indigo-600 hover:text-indigo-800 transition-colors inline-flex items-center gap-1.5">
             <span>Truy cập trang Quản lý (Dashboard)</span>
-          </Link>
+          </a>
         </div>
 
       </div>

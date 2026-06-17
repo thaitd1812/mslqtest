@@ -12,6 +12,7 @@ export async function GET() {
   const { data: results, error } = await supabase
     .from('mslq_results')
     .select('id, created_at, status, omr_meta_jsonb, scores_jsonb, answers_jsonb')
+    .eq('status', 'done')
     .order('created_at', { ascending: false });
 
   if (error) {
