@@ -15,7 +15,7 @@ export default async function DashboardPage(props: { searchParams: Promise<{ [ke
 
   let query = supabase
     .from('mslq_results')
-    .select('id, created_at, status, omr_meta_jsonb, scores_jsonb')
+    .select('id, created_at, status, omr_meta_jsonb, scores_jsonb, report_pdf_url')
     .order('created_at', { ascending: false })
     .limit(100);
 
@@ -132,7 +132,7 @@ export default async function DashboardPage(props: { searchParams: Promise<{ [ke
                       {/* Actions */}
                       <td className="px-6 py-4 whitespace-nowrap text-right">
                         <Link 
-                          href={isDone ? `/result/${row.id}` : `/review/${row.id}`}
+                          href={isDone ? `/result/${row.id}?pdf=${encodeURIComponent(row.report_pdf_url || '')}` : `/review/${row.id}`}
                           className="inline-flex items-center gap-1.5 text-sm font-medium text-indigo-600 hover:text-indigo-800 transition-colors"
                         >
                           <FileText className="w-4 h-4" />
