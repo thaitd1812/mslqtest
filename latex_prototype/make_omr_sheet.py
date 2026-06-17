@@ -15,9 +15,9 @@ Chạy:  python3 make_omr_sheet.py   (cần xelatex)
 import subprocess
 from test_parser import MSLQ_QUESTIONS
 
-PREAMBLE = r"""\documentclass[11pt, a4paper]{article}
-\usepackage[a4paper,top=0.6in,bottom=1.4in,left=0.6in,right=0.6in,headsep=10pt,footskip=70pt]{geometry}
-\setlength{\headheight}{40pt}
+PREAMBLE = r"""\documentclass[14pt, a4paper]{extarticle}
+\usepackage[a4paper,top=0.5in,bottom=2.0in,left=0.6in,right=0.6in,headsep=10pt,footskip=40pt]{geometry}
+\setlength{\headheight}{50pt}
 
 % \usepackage{fontspec}
 % \setmainfont{Avenir Next}
@@ -36,21 +36,21 @@ PREAMBLE = r"""\documentclass[11pt, a4paper]{article}
 \usepackage{tikz}
 \usepackage{tabularx}
 \setlength{\parindent}{0pt}
-
 \pagestyle{fancy}\fancyhf{}
 \renewcommand{\headrulewidth}{0pt}\renewcommand{\footrulewidth}{0.5pt}
-\fancyhead[L]{\includegraphics[scale=0.36]{../Logo4.png}}
+\fancyhead[L]{\includegraphics[height=1.5cm]{../Logo4.png}}
+\fancyhead[C]{%
+  \tikz[remember picture,overlay] \node[opacity=0.2,inner sep=0pt,rotate=60] at (current page.center){\includegraphics[width=0.8\paperwidth]{../Watermark_Opacity_20.png}};%
+}
 \fancyfoot[C]{%
-  \scriptsize\color{muted}%
-  \begin{minipage}[b]{\linewidth}
+  \fontsize{8pt}{10pt}\selectfont\color{muted}%
+  \begin{minipage}{\linewidth}
     \textbf{CÔNG TY CỔ PHẦN GIÁO DỤC VÀ CÔNG NGHỆ MATHTECH}\\[3pt]
-    \begin{tabular}[b]{@{}l@{\ }l}
-      Hotline: & Kim Giang: 0986.482.343 | Minh Khai: 0917.551.881 | Long Biên: 0941.201.881 \\
-               & Mỹ Đình: 0911.301.881 | Hà Đông: 0886.541.881 | Hoàng Cầu: 0946.201.881 \\
-               & Nguyễn Thị Định: 0914.641.881 | Định Công: 0914.241.881 \\
-      Website: & \underline{www.mathtech.vn}
-    \end{tabular}\hfill
-    Trang \thepage
+    Hotline: Kim Giang: 0986.482.343 | Minh Khai: 0917.551.881 | Long Biên: 0941.201.881 \\
+    Mỹ Đình: 0911.301.881 | Hà Đông: 0886.541.881 | Hoàng Cầu: 0946.201.881 \\
+    Nguyễn Thị Định: 0914.641.881 | Định Công: 0914.241.881 \\[2pt]
+    Website: \underline{www.mathtech.vn}
+    \hfill Trang \thepage
   \end{minipage}%
 }
 
@@ -58,31 +58,31 @@ PREAMBLE = r"""\documentclass[11pt, a4paper]{article}
 \newcolumntype{L}[1]{>{\RaggedRight\arraybackslash}m{#1}}
 
 % Ô tròn to để tô tay (thu nhỏ chút)
-\newcommand{\bub}{\tikz[baseline=-0.6ex]{\draw[line width=0.8pt,color=ink] (0,0) circle (1.8mm);}}
+\newcommand{\bub}{\tikz[baseline=-0.6ex]{\draw[line width=0.8pt,color=ink] (0,0) circle (1.6mm);}}
 % Số có vòng tròn cho legend
-\newcommand{\cnum}[1]{\tikz[baseline=-0.6ex]{\draw[line width=0.7pt,color=ink] (0,0) circle (1.8mm); \node[font=\bfseries\scriptsize]{#1};}}
+\newcommand{\cnum}[1]{\tikz[baseline=-0.6ex]{\draw[line width=0.7pt,color=ink] (0,0) circle (1.6mm); \node[font=\bfseries\scriptsize]{#1};}}
 
 \begin{document}
 
 % ===== TIÊU ĐỀ =====
 \begin{center}
-{\footnotesize\color{muted}\textbf{PHIẾU TRẢ LỜI}}\\[3pt]
+{\footnotesize\color{muted}\textbf{PHIẾU TRẢ LỜI}}\\[1pt]
 {\bfseries\large BÀI TRẮC NGHIỆM ĐÁNH GIÁ ĐỘNG LỰC VÀ CHIẾN LƯỢC HỌC TẬP}
 \end{center}
-\vspace{4pt}{\color{ink}\rule{\linewidth}{1pt}}
-\vspace{9pt}
+\vspace{2pt}{\color{ink}\rule{\linewidth}{1pt}}
+\vspace{2pt}
 
 % ===== THÔNG TIN =====
-{\textbf{Họ và tên:}~\rule[-2pt]{8.2cm}{0.5pt}\hfill\textbf{Năm sinh:}~\rule[-2pt]{3.1cm}{0.5pt}}
-\vspace{4pt}
+{\small\textbf{Họ và tên:}~\rule[-2pt]{8.2cm}{0.5pt}\hfill\textbf{Năm sinh:}~\rule[-2pt]{3.1cm}{0.5pt}}
+\par\vspace{2pt}
 
 % ===== HƯỚNG DẪN =====
 \noindent{\small \textbf{Đánh giá mức độ đồng tình của con với các phát biểu sau đây về động lực và chiến lược học tập. Con hãy chọn mức độ thể hiện ĐÚNG NHẤT ý kiến của mình ở mỗi dòng, theo thang mức dưới đây:}}
-\par\vspace{7pt}
+\vspace{-2pt}
 
 % ===== LEGEND =====
 \noindent{\footnotesize\textbf{Thang mức:}}
-\par\vspace{4pt}
+\par\vspace{2pt}
 \bgroup
 \footnotesize
 \renewcommand{\arraystretch}{1.5}
@@ -96,16 +96,16 @@ PREAMBLE = r"""\documentclass[11pt, a4paper]{article}
 \textbf{Hoàn toàn đúng với con}\par \textit{(Rất đúng với con, gần như lúc nào cũng như vậy)} \\ \hline
 \end{tabularx}
 \egroup
-\par\vspace{6pt}
+\vspace{1pt}
 {\small\textbf{Lưu ý:}~mỗi dòng tô kín đúng \textbf{MỘT} ô tròn bằng bút mực hoặc bút chì đậm.}
-\vspace{9pt}
+\vspace{1pt}
 
 % ===== BẢNG =====
 \arrayrulecolor{ink}
 \setlength{\arrayrulewidth}{0.5pt}
 \setlength{\tabcolsep}{3pt}
 \renewcommand{\arraystretch}{1.05}
-\begin{longtable}{|M{0.6cm}|L{9.5cm}|M{0.65cm}|M{0.65cm}|M{0.65cm}|M{0.65cm}|M{0.65cm}|}
+\begin{longtable}{|M{0.8cm}|L{11.5cm}|M{0.8cm}|M{0.8cm}|M{0.8cm}|M{0.8cm}|M{0.8cm}|}
 \hline
 \rowcolor{headfill}
 \textbf{\small Câu} & \textbf{\small Nội dung} & \textbf{\small 1} & \textbf{\small 2} & \textbf{\small 3} & \textbf{\small 4} & \textbf{\small 5} \\ \hline
@@ -133,7 +133,7 @@ def build_rows():
     rows = []
     bubbles = " & ".join([r"\bub"] * 5)
     for i, q in enumerate(MSLQ_QUESTIONS, start=1):
-        rows.append(r"%d & \footnotesize %s & %s \\ \hline" % (i, _esc(q), bubbles))
+        rows.append(r"\textbf{\small %d} & %s & %s \\ \hline" % (i, _esc(q), bubbles))
     return "\n".join(rows)
 
 

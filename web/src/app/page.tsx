@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { UploadCloud, FileImage, Loader2, AlertCircle } from 'lucide-react';
 import imageCompression from 'browser-image-compression';
+import Link from 'next/link';
 
 export default function Home() {
   const [files, setFiles] = useState<File[]>([]);
@@ -184,6 +185,13 @@ export default function Home() {
               )}
             </button>
           </div>
+        </div>
+
+        {/* Footer Link to Dashboard */}
+        <div className="bg-slate-50 border-t border-slate-100 p-4 text-center">
+          <Link href="/dashboard" className="text-sm font-medium text-indigo-600 hover:text-indigo-800 transition-colors inline-flex items-center gap-1.5">
+            <span>Truy cập trang Quản lý (Dashboard)</span>
+          </Link>
         </div>
 
       </div>
