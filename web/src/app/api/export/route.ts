@@ -56,11 +56,11 @@ export async function GET() {
       `"${new Date(row.created_at).toLocaleString('vi-VN')}"`,
       `"${meta.studentName || ''}"`,
       `"${meta.studentDob || ''}"`,
-      scores['Niềm tin năng lực'] ? Number(scores['Niềm tin năng lực']).toFixed(1) : '',
-      scores['Giá trị và hứng thú'] ? Number(scores['Giá trị và hứng thú']).toFixed(1) : '',
-      scores['Lo âu kiểm tra'] ? Number(scores['Lo âu kiểm tra']).toFixed(1) : '',
+      scores['Niềm tin vào năng lực học tập'] ? Number(scores['Niềm tin vào năng lực học tập']).toFixed(1) : '',
+      scores['Giá trị và hứng thú học tập'] ? Number(scores['Giá trị và hứng thú học tập']).toFixed(1) : '',
+      scores['Lo âu khi kiểm tra'] ? Number(scores['Lo âu khi kiểm tra']).toFixed(1) : '',
       scores['Chiến lược học tập'] ? Number(scores['Chiến lược học tập']).toFixed(1) : '',
-      scores['Tự điều chỉnh'] ? Number(scores['Tự điều chỉnh']).toFixed(1) : '',
+      scores['Khả năng tự điều chỉnh việc học'] ? Number(scores['Khả năng tự điều chỉnh việc học']).toFixed(1) : '',
       `"${row.status}"`,
       `"${row.id}"`
     ];

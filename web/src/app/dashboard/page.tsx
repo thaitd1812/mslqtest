@@ -110,11 +110,11 @@ export default async function DashboardPage(props: { searchParams: Promise<{ [ke
                       </td>
                       
                       {/* 5 Group Scores */}
-                      <td className="px-6 py-4 text-center font-medium text-gray-700">{getScore(scores, 'Niềm tin năng lực')}</td>
-                      <td className="px-6 py-4 text-center font-medium text-gray-700">{getScore(scores, 'Giá trị và hứng thú')}</td>
-                      <td className="px-6 py-4 text-center font-medium text-gray-700">{getScore(scores, 'Lo âu kiểm tra')}</td>
+                      <td className="px-6 py-4 text-center font-medium text-gray-700">{getScore(scores, 'Niềm tin vào năng lực học tập')}</td>
+                      <td className="px-6 py-4 text-center font-medium text-gray-700">{getScore(scores, 'Giá trị và hứng thú học tập')}</td>
+                      <td className="px-6 py-4 text-center font-medium text-gray-700">{getScore(scores, 'Lo âu khi kiểm tra')}</td>
                       <td className="px-6 py-4 text-center font-medium text-gray-700">{getScore(scores, 'Chiến lược học tập')}</td>
-                      <td className="px-6 py-4 text-center font-medium text-gray-700">{getScore(scores, 'Tự điều chỉnh')}</td>
+                      <td className="px-6 py-4 text-center font-medium text-gray-700">{getScore(scores, 'Khả năng tự điều chỉnh việc học')}</td>
                       
                       {/* Status */}
                       <td className="px-6 py-4 whitespace-nowrap">
