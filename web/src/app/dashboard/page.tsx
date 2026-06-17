@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import Link from 'next/link';
 import { ArrowLeft, Download, FileText, CheckCircle, Clock } from 'lucide-react';
+import DeleteButton from '@/components/DeleteButton';
 
 export const dynamic = 'force-dynamic';
 
@@ -138,6 +139,7 @@ export default async function DashboardPage(props: { searchParams: Promise<{ [ke
                           <FileText className="w-4 h-4" />
                           <span>{isDone ? 'Xem điểm' : 'Duyệt bài'}</span>
                         </Link>
+                        <DeleteButton id={row.id} />
                       </td>
                     </tr>
                   );
