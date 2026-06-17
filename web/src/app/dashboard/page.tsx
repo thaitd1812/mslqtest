@@ -106,7 +106,7 @@ export default async function DashboardPage(props: { searchParams: Promise<{ [ke
                       </td>
                       <td className="px-6 py-4">
                         <div className="font-medium text-gray-900">{meta.studentName || 'Chưa nhập tên'}</div>
-                        <div className="text-xs text-gray-500">NS: {meta.studentDob || '---'}</div>
+                        <div className="text-xs text-gray-500">NS: {meta.studentDob || '---'} | SĐT: {meta.parentPhone || '---'}</div>
                       </td>
                       
                       {/* 5 Group Scores */}

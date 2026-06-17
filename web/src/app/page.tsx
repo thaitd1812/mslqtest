@@ -10,6 +10,7 @@ export default function Home() {
   const [files, setFiles] = useState<File[]>([]);
   const [studentName, setStudentName] = useState('');
   const [studentDob, setStudentDob] = useState('');
+  const [parentPhone, setParentPhone] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
@@ -52,6 +53,7 @@ export default function Home() {
       
       formData.append('studentName', studentName);
       formData.append('studentDob', studentDob);
+      formData.append('parentPhone', parentPhone);
 
       const res = await fetch('/api/scan', {
         method: 'POST',
@@ -156,6 +158,17 @@ export default function Home() {
                   className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all text-slate-800 placeholder:text-slate-400"
                 />
               </div>
+            </div>
+
+            <div className="mt-4">
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Số điện thoại phụ huynh</label>
+              <input 
+                type="tel" 
+                value={parentPhone}
+                onChange={(e) => setParentPhone(e.target.value)}
+                placeholder="VD: 0987654321"
+                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all text-slate-800 placeholder:text-slate-400"
+              />
             </div>
 
             {error && (

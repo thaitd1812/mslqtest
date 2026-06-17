@@ -18,6 +18,7 @@ export async function POST(req: Request) {
         const files = formData.getAll('files') as File[];
         const studentName = formData.get('studentName') as string || '';
         const studentDob = formData.get('studentDob') as string || '';
+        const parentPhone = formData.get('parentPhone') as string || '';
         
         if (!files || files.length === 0) {
             return NextResponse.json({ error: 'Missing files' }, { status: 400 });
@@ -93,7 +94,7 @@ export async function POST(req: Request) {
                 id: resultId,
                 tenant_id: tenantId,
                 answers_jsonb: data.answers,
-                omr_meta_jsonb: { studentName: studentName || 'Chưa nhập tên', studentDob },
+                omr_meta_jsonb: { studentName: studentName || 'Chưa nhập tên', studentDob, parentPhone },
                 photo_url: JSON.stringify(fileUrls), // Lưu mảng các link ảnh gốc
                 status: 'review'
             });
