@@ -125,7 +125,7 @@ async def process_omr_gemini_async(jpeg_images: list[bytes]):
             
     # Fallback back to standard GEMINI_API_KEY if none of the numbered ones exist
     if not api_keys:
-        k = os.getenv("GEMINI_API_KEY")
+        k = os.getenv("GEMINI_API_KEY") or os.getenv("GEMINI_API_KEYS")
         if k:
             api_keys.append(k)
             

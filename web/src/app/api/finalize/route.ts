@@ -79,7 +79,7 @@ export async function POST(req: Request) {
 
         if (updateError) {
             console.error("Database Update Error:", updateError);
-            return NextResponse.json({ error: 'Failed to update database' }, { status: 500 });
+            return NextResponse.json({ error: `Failed to update database: ${updateError.message}` }, { status: 500 });
         }
 
         // Return the PDF URL
