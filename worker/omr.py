@@ -146,7 +146,7 @@ async def process_omr_gemini_async(jpeg_images: list[bytes]):
     max_retries = 3
     for attempt in range(max_retries):
         for key_idx, api_key in enumerate(api_keys):
-            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key={api_key}"
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
             try:
                 async with httpx.AsyncClient(timeout=60.0) as client:
                     resp = await client.post(url, json=payload)

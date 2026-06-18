@@ -12,7 +12,7 @@ export default async function DashboardPage(props: { searchParams: Promise<{ [ke
     process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZvY2p0b3ZzdXBlY3NmcHpxenZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE0OTkxMTMsImV4cCI6MjA5NzA3NTExM30.ZKtQMrF2YDKKMfeTFfbj89rKy9J1TJ2TYNG5_2e9SXI'
   );
 
-  const statusFilter = searchParams.status === 'review' ? 'review' : (searchParams.status === 'all' ? 'all' : 'done');
+  const statusFilter = searchParams.status === 'review' ? 'review' : (searchParams.status === 'all' ? 'all' : 'completed');
 
   let query = supabase
     .from('mslq_results')
@@ -52,7 +52,7 @@ export default async function DashboardPage(props: { searchParams: Promise<{ [ke
             <div className="flex items-center gap-4 text-sm mt-3 ml-11">
               <span className="text-gray-500">Lọc theo:</span>
               <div className="flex gap-2">
-                <Link href="/dashboard?status=done" className={`px-3 py-1 rounded-full transition-colors ${statusFilter === 'done' ? 'bg-indigo-100 text-indigo-700 font-medium' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
+                <Link href="/dashboard?status=completed" className={`px-3 py-1 rounded-full transition-colors ${statusFilter === 'completed' ? 'bg-indigo-100 text-indigo-700 font-medium' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
                   Hoàn thành
                 </Link>
                 <Link href="/dashboard?status=review" className={`px-3 py-1 rounded-full transition-colors ${statusFilter === 'review' ? 'bg-indigo-100 text-indigo-700 font-medium' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
@@ -95,7 +95,7 @@ export default async function DashboardPage(props: { searchParams: Promise<{ [ke
                 {results?.map((row) => {
                   const meta = row.omr_meta_jsonb || {};
                   const scores = row.scores_jsonb || {};
-                  const isDone = row.status === 'done';
+                  const isDone = row.status === 'completed';
                   
                   return (
                     <tr key={row.id} className="hover:bg-gray-50/50 transition-colors">
