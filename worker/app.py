@@ -1,7 +1,8 @@
 import os
+import base64
 from dotenv import load_dotenv
 load_dotenv()
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 from fastapi import FastAPI, HTTPException, Request, Depends
 from fastapi.responses import JSONResponse
 import httpx
@@ -22,8 +23,13 @@ def verify_token(request: Request):
     if token != WORKER_SECRET:
         raise HTTPException(status_code=403, detail="Forbidden")
 
+class FileData(BaseModel):
+    filename: str
+    content_b64: str
+
 class OMRRequest(BaseModel):
-    file_urls: List[str]
+    files: Optional[List[FileData]] = None
+    file_urls: Optional[List[str]] = None
 
 class RenderRequest(BaseModel):
     placeholders: Dict[str, str]
@@ -37,23 +43,31 @@ def health_check():
 async def process_omr(req: OMRRequest):
     try:
         files_data = []
-        async with httpx.AsyncClient() as client:
-            for f_url in req.file_urls:
-                if f_url.startswith("file://"):
-                    path = f_url.replace("file://", "")
-                    with open(path, "rb") as f:
-                        content = f.read()
-                    filename = os.path.basename(path)
-                    files_data.append({"filename": filename, "content": content})
-                else:
-                    resp = await client.get(f_url)
-                    resp.raise_for_status()
-                    # extract filename from URL if possible
-                    filename = f_url.split('/')[-1]
-                    files_data.append({"filename": filename, "content": resp.content})
-                    
+        if req.files:
+            for f in req.files:
+                content = base64.b64decode(f.content_b64)
+                files_data.append({"filename": f.filename, "content": content})
+        elif req.file_urls:
+            async with httpx.AsyncClient() as client:
+                for f_url in req.file_urls:
+                    if f_url.startswith("file://"):
+                        path = f_url.replace("file://", "")
+                        with open(path, "rb") as f:
+                            content = f.read()
+                        filename = os.path.basename(path)
+                        files_data.append({"filename": filename, "content": content})
+                    else:
+                        resp = await client.get(f_url)
+                        resp.raise_for_status()
+                        filename = f_url.split('/')[-1]
+                        files_data.append({"filename": filename, "content": resp.content})
+        else:
+            raise HTTPException(status_code=400, detail="No files or file_urls provided")
+
         result = await omr.process_files_async(files_data)
         return result
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

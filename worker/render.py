@@ -38,18 +38,16 @@ def generate_pdf(placeholders: dict) -> bytes:
         with open(tex_path, "w", encoding="utf-8") as f:
             f.write(template)
             
-        # Run xelatex twice to resolve layout and longtable headers
-        for _ in range(2):
-            result = subprocess.run(
-                ["xelatex", "-interaction=nonstopmode", "report.tex"],
-                cwd=tmpdir,
-                capture_output=True,
-                text=True
-            )
-            if result.returncode != 0:
-                print("XeLaTeX Error:", result.stdout)
-                print("XeLaTeX Stderr:", result.stderr)
-                raise RuntimeError("Failed to compile LaTeX template.")
+        result = subprocess.run(
+            ["xelatex", "-interaction=nonstopmode", "report.tex"],
+            cwd=tmpdir,
+            capture_output=True,
+            text=True
+        )
+        if result.returncode != 0:
+            print("XeLaTeX Error:", result.stdout)
+            print("XeLaTeX Stderr:", result.stderr)
+            raise RuntimeError("Failed to compile LaTeX template.")
                 
         with open(pdf_path, "rb") as f:
             pdf_bytes = f.read()

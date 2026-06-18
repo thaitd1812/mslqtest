@@ -67,15 +67,11 @@ export default function ReviewPage() {
             const res = await fetch('/api/finalize', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    result_id: id,
-                    answers: rawAnswers,
-                    studentInfo: studentInfo
-                })
+                body: JSON.stringify({ result_id: id, answers: rawAnswers })
             });
             const data = await res.json();
-            if (res.ok && data.pdf_url) {
-                router.push(`/result/${id}?pdf=${encodeURIComponent(data.pdf_url)}`);
+            if (res.ok) {
+                router.push(`/result/${id}`);
             } else {
                 alert('Có lỗi xảy ra: ' + data.error);
                 setIsFinalizing(false);
