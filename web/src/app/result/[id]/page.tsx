@@ -117,7 +117,7 @@ export default function ResultPage() {
                         const tier = getTierFromAvg(avg);
                         const style = group.reversed ? TIER_STYLE_ANXIETY[tier] : TIER_STYLE[tier];
                         const level = group.reversed ? LEVELS_ANXIETY[tier] : LEVELS_POSITIVE[tier];
-                        const pct = Math.round(((avg - 1) / 4) * 100);
+                        const filled = Math.round(avg);
 
                         return (
                             <div key={group.key} className={`rounded-xl border p-4 ${style.bg} ${style.border}`}>
@@ -129,8 +129,10 @@ export default function ResultPage() {
                                     <span className={`text-xs font-bold px-2 py-1 rounded-full whitespace-nowrap ${style.badge}`}>{level}</span>
                                 </div>
                                 <div className="flex items-center gap-2 mt-3">
-                                    <div className="flex-1 h-2 bg-white/60 rounded-full overflow-hidden">
-                                        <div className={`h-full rounded-full ${style.bar}`} style={{ width: `${pct}%` }} />
+                                    <div className="flex gap-1 flex-1">
+                                        {[1, 2, 3, 4, 5].map(i => (
+                                            <div key={i} className={`h-2 flex-1 rounded-full ${i <= filled ? style.bar : 'bg-white/50'}`} />
+                                        ))}
                                     </div>
                                     <span className="text-sm font-bold text-slate-700 w-8 text-right">{avg.toFixed(1)}</span>
                                 </div>

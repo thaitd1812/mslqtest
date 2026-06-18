@@ -133,16 +133,33 @@ async def process_omr_gemini_async(jpeg_images: list[bytes]):
         print("[OMR] Error: No GEMINI_API_KEY found")
         return False, []
         
-    parts = [{"text": "This is a student motivation survey OMR. Read the selected bubble (from 1 to 5) for each question. The questions are numbered 1 to 44. Return ONLY a JSON array of objects with 'q' for question number and 'v' for the selected value. Example: [{\"q\": 1, \"v\": 4}, {\"q\": 2, \"v\": 1}]. If there are multiple pages, read them all sequentially."}]
-    
+    prompt = (
+        "This is an OMR answer sheet for a 44-question student motivation survey (MSLQ, scale 1-5).\n\n"
+        "Sheet layout:\n"
+        "- Questions 1 to 44 are listed vertically, top to bottom.\n"
+        "- Each question has 5 answer bubbles (labeled 1, 2, 3, 4, 5) arranged as columns on the RIGHT side of the sheet.\n"
+        "- Column order left-to-right: 1, 2, 3, 4, 5.\n"
+        "- Exactly ONE bubble per row is filled/darkened by the student.\n"
+        "- If multiple pages are provided, read questions sequentially across all pages.\n\n"
+        "Task: For each of the 44 questions, identify which bubble (1-5) is filled or darkened.\n"
+        "If a row has no clearly filled bubble, default to 3.\n\n"
+        "Return a JSON array of exactly 44 objects. Each object: {\"q\": <question_number>, \"v\": <selected_value>}.\n"
+        "Example: [{\"q\":1,\"v\":3},{\"q\":2,\"v\":5},...,{\"q\":44,\"v\":2}]"
+    )
+
+    parts = [{"text": prompt}]
     for img_bytes in jpeg_images:
         b64_img = base64.b64encode(img_bytes).decode("utf-8")
         parts.append({"inlineData": {"mimeType": "image/jpeg", "data": b64_img}})
-        
+
     payload = {
-        "contents": [{"parts": parts}]
+        "contents": [{"parts": parts}],
+        "generationConfig": {
+            "temperature": 0,
+            "responseMimeType": "application/json"
+        }
     }
-    
+
     max_retries = 3
     for attempt in range(max_retries):
         for key_idx, api_key in enumerate(api_keys):
@@ -156,23 +173,21 @@ async def process_omr_gemini_async(jpeg_images: list[bytes]):
                     resp.raise_for_status()
                     res_data = resp.json()
                     text_res = res_data['candidates'][0]['content']['parts'][0]['text']
-                    
-                    # Extract JSON block
-                    if "```json" in text_res:
-                        text_res = text_res.split("```json")[1].split("```")[0]
-                    elif "```" in text_res:
-                        text_res = text_res.split("```")[1].split("```")[0]
-                        
+
                     answers = json.loads(text_res.strip())
+
+                    if not isinstance(answers, list) or len(answers) < 40:
+                        print(f"[OMR] Gemini returned {len(answers) if isinstance(answers, list) else 'invalid'} answers, expected 44. Retrying...")
+                        continue
+
                     return True, answers
             except Exception as e:
                 print(f"[OMR] Gemini API error with Key {key_idx + 1}: {e}")
-                continue # Try the next key
-                
-        # If all keys failed for this attempt, wait and retry the loop
-        print(f"[OMR] All keys failed or rate-limited on attempt {attempt+1}/{max_retries}. Waiting 2s...")
+                continue
+
+        print(f"[OMR] All keys failed on attempt {attempt+1}/{max_retries}. Waiting 2s...")
         await asyncio.sleep(2)
-            
+
     return False, []
 
 def build_final_result(answers):
