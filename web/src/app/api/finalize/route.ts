@@ -70,7 +70,7 @@ export async function POST(req: Request) {
         const { error: updateError } = await supabase
             .from('mslq_results')
             .update({
-                status: 'done',
+                status: 'completed',
                 scores_jsonb: scores_jsonb,
                 answers_jsonb: final_answers_jsonb,
                 report_pdf_url: data.pdf_url

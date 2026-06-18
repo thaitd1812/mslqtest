@@ -21,7 +21,7 @@ CREATE TABLE mslq_results (
     omr_meta_jsonb JSONB,
     scores_jsonb JSONB,
     report_pdf_url TEXT,
-    status TEXT CHECK (status IN ('reading', 'review', 'done')),
+    status TEXT CHECK (status IN ('reading', 'review', 'completed')),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
