@@ -28,9 +28,9 @@ export async function POST(req: Request) {
             const buffer = Buffer.from(await file.arrayBuffer());
             const safeName = `${Date.now()}_${i}_${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
             
-            // Upload lên Supabase Storage bucket 'mslq-photos'
+            // Upload lên Supabase Storage bucket 'mslq-uploads'
             const { error: uploadError } = await supabase.storage
-                .from('mslq-photos')
+                .from('mslq-uploads')
                 .upload(safeName, buffer, {
                     contentType: file.type,
                     upsert: true
@@ -42,7 +42,7 @@ export async function POST(req: Request) {
             }
             
             // Lấy public URL
-            const { data: publicUrlData } = supabase.storage.from('mslq-photos').getPublicUrl(safeName);
+            const { data: publicUrlData } = supabase.storage.from('mslq-uploads').getPublicUrl(safeName);
             return publicUrlData.publicUrl;
         });
 
