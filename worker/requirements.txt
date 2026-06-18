@@ -7,3 +7,4 @@ python-multipart==0.0.9
 supabase==2.5.1
 pymupdf
 pillow-heif
+python-dotenv
