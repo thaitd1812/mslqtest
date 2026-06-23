@@ -24,6 +24,13 @@
 \fancyhead[L]{\includegraphics[height=1.5cm]{../Logo4.png}}
 \fancyhead[C]{%
   \tikz[remember picture,overlay] \node[opacity=0.2,inner sep=0pt,rotate=60] at (current page.center){\includegraphics[width=0.8\paperwidth]{../Watermark_Opacity_20.png}};%
+  % ===== MỐC ĐỊNH VỊ 4 GÓC (fiducial) — vẽ mọi trang. Mốc TRÊN to (6mm), DƯỚI nhỏ (4mm) để nhận chiều phiếu.
+  \begin{tikzpicture}[remember picture,overlay]
+    \fill[black] ([shift={( 7mm,-7mm)}]current page.north west) rectangle ++( 6mm,-6mm);
+    \fill[black] ([shift={(-7mm,-7mm)}]current page.north east) rectangle ++(-6mm,-6mm);
+    \fill[black] ([shift={( 7mm, 7mm)}]current page.south west) rectangle ++( 4mm, 4mm);
+    \fill[black] ([shift={(-7mm, 7mm)}]current page.south east) rectangle ++(-4mm, 4mm);
+  \end{tikzpicture}%
 }
 \fancyfoot[C]{%
   \fontsize{8pt}{10pt}\selectfont\color{muted}%
@@ -42,6 +49,8 @@
 
 % Ô tròn to để tô tay (thu nhỏ chút)
 \newcommand{\bub}{\tikz[baseline=-0.6ex]{\draw[line width=0.8pt,color=ink] (0,0) circle (1.6mm);}}
+% Ô mốc định vị DÒNG (timing mark) — 1 ô đen đặc ở đầu mỗi câu, giúp OMR locate dòng dù cao-thấp khác nhau
+\newcommand{\rowmark}{\rule{4mm}{4mm}}
 % Số có vòng tròn cho legend
 \newcommand{\cnum}[1]{\tikz[baseline=-0.6ex]{\draw[line width=0.7pt,color=ink] (0,0) circle (1.6mm); \node[font=\bfseries\scriptsize]{#1};}}
 
@@ -57,9 +66,7 @@
 
 % ===== THÔNG TIN =====
 {\small\textbf{Họ và tên:}~\rule[-2pt]{8.2cm}{0.5pt}\hfill\textbf{Năm sinh:}~\rule[-2pt]{3.1cm}{0.5pt}}
-\par\vspace{6pt}
-{\small\textbf{Số điện thoại phụ huynh:}~\rule[-2pt]{11cm}{0.5pt}}
-\par\vspace{4pt}
+\par\vspace{2pt}
 
 % ===== HƯỚNG DẪN =====
 \noindent{\small \textbf{Đánh giá mức độ đồng tình của con với các phát biểu sau đây về động lực và chiến lược học tập. Con hãy chọn mức độ thể hiện ĐÚNG NHẤT ý kiến của mình ở mỗi dòng, theo thang mức dưới đây:}}
@@ -90,63 +97,63 @@
 \setlength{\arrayrulewidth}{0.5pt}
 \setlength{\tabcolsep}{3pt}
 \renewcommand{\arraystretch}{1.05}
-\begin{longtable}{|M{0.8cm}|L{11.5cm}|M{0.8cm}|M{0.8cm}|M{0.8cm}|M{0.8cm}|M{0.8cm}|}
+\begin{longtable}{|M{0.5cm}|M{0.8cm}|L{10.6cm}|M{0.8cm}|M{0.8cm}|M{0.8cm}|M{0.8cm}|M{0.8cm}|}
 \hline
 \rowcolor{headfill}
-\textbf{\small Câu} & \textbf{\small Nội dung} & \textbf{\small 1} & \textbf{\small 2} & \textbf{\small 3} & \textbf{\small 4} & \textbf{\small 5} \\ \hline
+ & \textbf{\small Câu} & \textbf{\small Nội dung} & \textbf{\small 1} & \textbf{\small 2} & \textbf{\small 3} & \textbf{\small 4} & \textbf{\small 5} \\ \hline
 \endfirsthead
 \hline
 \rowcolor{headfill}
-\textbf{\small Câu} & \textbf{\small Nội dung} & \textbf{\small 1} & \textbf{\small 2} & \textbf{\small 3} & \textbf{\small 4} & \textbf{\small 5} \\ \hline
+ & \textbf{\small Câu} & \textbf{\small Nội dung} & \textbf{\small 1} & \textbf{\small 2} & \textbf{\small 3} & \textbf{\small 4} & \textbf{\small 5} \\ \hline
 \endhead
 \hline
 \endfoot
 \hline
 \endlastfoot
-\textbf{\small 1} & So với các bạn khác trong lớp, con nghĩ mình học môn Toán khá tốt. & \bub & \bub & \bub & \bub & \bub \\ \hline
-\textbf{\small 2} & Con thấy những gì mình được học trong môn Toán rất thú vị. & \bub & \bub & \bub & \bub & \bub \\ \hline
-\textbf{\small 3} & Con nghĩ những kiến thức trong môn học Toán rất có ích cho cuộc sống sau này của con. & \bub & \bub & \bub & \bub & \bub \\ \hline
-\textbf{\small 4} & Việc học hiểu rõ bản chất môn học Toán rất quan trọng đối với con. & \bub & \bub & \bub & \bub & \bub \\ \hline
-\textbf{\small 5} & Con thích những bài tập khó của môn Toán vì chúng giúp con học được điều mới. & \bub & \bub & \bub & \bub & \bub \\ \hline
-\textbf{\small 6} & Con tin là mình sẽ hiểu được những kiến thức được dạy trong môn học Toán. & \bub & \bub & \bub & \bub & \bub \\ \hline
-\textbf{\small 7} & Con nghĩ mình biết cách học môn Toán hiệu quả hơn các bạn khác trong lớp. & \bub & \bub & \bub & \bub & \bub \\ \hline
-\textbf{\small 8} & Thường thì con tự muốn học môn Toán hơn là bị bố mẹ hay thầy cô ép buộc. & \bub & \bub & \bub & \bub & \bub \\ \hline
-\textbf{\small 9} & Con tin là mình có thể đạt điểm tốt trong môn học Toán. & \bub & \bub & \bub & \bub & \bub \\ \hline
-\textbf{\small 10} & Con thích cách suy nghĩ và giải quyết vấn đề của môn học Toán. & \bub & \bub & \bub & \bub & \bub \\ \hline
-\textbf{\small 11} & Khi làm bài tập về nhà môn Toán, con cố gắng tự làm một mình mà không cần ai giúp. & \bub & \bub & \bub & \bub & \bub \\ \hline
-\textbf{\small 12} & Con tin là mình có thể làm tốt các bài tập về nhà của môn Toán. & \bub & \bub & \bub & \bub & \bub \\ \hline
-\textbf{\small 13} & Con thấy những tài liệu, sách đọc thêm của môn Toán rất hay. & \bub & \bub & \bub & \bub & \bub \\ \hline
-\textbf{\small 14} & Con nghĩ việc học tốt môn Toán sẽ giúp con học tốt các môn học khác. & \bub & \bub & \bub & \bub & \bub \\ \hline
-\textbf{\small 15} & Con biết mình hoàn toàn có thể học tốt môn Toán nếu cố gắng. & \bub & \bub & \bub & \bub & \bub \\ \hline
-\textbf{\small 16} & Kể cả khi bài tập không bị chấm điểm, con vẫn muốn làm để hiểu bài hơn. & \bub & \bub & \bub & \bub & \bub \\ \hline
-\textbf{\small 17} & Ngay cả khi bài học rất khó, con vẫn tin là mình sẽ hiểu được nếu không bỏ cuộc. & \bub & \bub & \bub & \bub & \bub \\ \hline
-\textbf{\small 18} & Con tin rằng mình có thể giải quyết được những bài tập khó nhất mà thầy cô giao. & \bub & \bub & \bub & \bub & \bub \\ \hline
-\textbf{\small 19} & Khi làm bài thi, con hay nghĩ về việc mình sẽ bị điểm kém và bị mắng. & \bub & \bub & \bub & \bub & \bub \\ \hline
-\textbf{\small 20} & Con hay bị lo lắng và bồn chồn mỗi khi có bài kiểm tra hoặc bài thi. & \bub & \bub & \bub & \bub & \bub \\ \hline
-\textbf{\small 21} & Lúc làm bài kiểm tra, con thấy tim mình đập nhanh hoặc run tay. & \bub & \bub & \bub & \bub & \bub \\ \hline
-\textbf{\small 22} & Nhiều khi con học bài rất kỹ ở nhà, nhưng vào phòng thi lo quá nên lại quên hết. & \bub & \bub & \bub & \bub & \bub \\ \hline
-\textbf{\small 23} & Khi học bài, con thường đọc đi đọc lại các ghi chép hoặc sách giáo khoa để nhớ. & \bub & \bub & \bub & \bub & \bub \\ \hline
-\textbf{\small 24} & Khi nghe giảng, con cố gắng liên hệ những gì thầy cô nói với những điều con đã biết trước đó. & \bub & \bub & \bub & \bub & \bub \\ \hline
-\textbf{\small 25} & Con thường tự vẽ sơ đồ, kẻ bảng hoặc gạch đầu dòng các ý chính để bài học dễ nhìn hơn. & \bub & \bub & \bub & \bub & \bub \\ \hline
-\textbf{\small 26} & Con luôn cố gắng hoàn thành bài tập về nhà đúng hạn chứ không để nước đến chân mới nhảy. & \bub & \bub & \bub & \bub & \bub \\ \hline
-\textbf{\small 27} & Con thường tự đặt câu hỏi cho mình để kiểm tra xem mình đã thực sự hiểu bài chưa. & \bub & \bub & \bub & \bub & \bub \\ \hline
-\textbf{\small 28} & Khi học bài, con thường tự tóm tắt hoặc viết lại bài học theo cách hiểu của riêng con. & \bub & \bub & \bub & \bub & \bub \\ \hline
-\textbf{\small 29} & Trước khi bắt đầu học, con thường tự đặt mục tiêu hôm nay mình sẽ hoàn thành những việc gì. & \bub & \bub & \bub & \bub & \bub \\ \hline
-\textbf{\small 30} & Khi làm bài tập khó, con cố gắng nhớ lại xem thầy cô đã giải các dạng bài tương tự trên lớp như thế nào. & \bub & \bub & \bub & \bub & \bub \\ \hline
-\textbf{\small 31} & Con thường tự nghĩ ra các ví dụ thực tế để hiểu rõ hơn các định nghĩa hoặc công thức. & \bub & \bub & \bub & \bub & \bub \\ \hline
-\textbf{\small 32} & Khi đọc sách hoặc tài liệu mà gặp chỗ không hiểu, con sẽ dừng lại đọc kỹ lại từ đầu hoặc đi hỏi chứ không bỏ qua. & \bub & \bub & \bub & \bub & \bub \\ \hline
-\textbf{\small 33} & Khi ôn thi, con thường xem lại tất cả các bài tập cũ đã làm trong vở. & \bub & \bub & \bub & \bub & \bub \\ \hline
-\textbf{\small 34} & Con biết cách chọn ra những phần kiến thức quan trọng nhất để tập trung ôn tập trước. & \bub & \bub & \bub & \bub & \bub \\ \hline
-\textbf{\small 35} & Con thường nhẩm đi nhẩm lại các từ khóa hoặc quy tắc quan trọng để không bị quên. & \bub & \bub & \bub & \bub & \bub \\ \hline
-\textbf{\small 36} & Trong lúc học, nếu thấy mình bắt đầu mất tập trung hoặc nghĩ chuyện khác, con sẽ chủ động kéo mình quay lại bài học. & \bub & \bub & \bub & \bub & \bub \\ \hline
-\textbf{\small 37} & Con cố gắng tìm mối liên hệ giữa các phần khác nhau của môn học Toán để thấy bức tranh toàn cảnh. & \bub & \bub & \bub & \bub & \bub \\ \hline
-\textbf{\small 38} & Khi đọc sách, con luôn chú ý đến các tiêu đề lớn và phần tóm tắt cuối chương trước. & \bub & \bub & \bub & \bub & \bub \\ \hline
-\textbf{\small 39} & Con thích tự tìm thêm các cách giải khác cho cùng một bài toán/vấn đề. & \bub & \bub & \bub & \bub & \bub \\ \hline
-\textbf{\small 40} & Con thường ghi lại những lỗi sai mình từng mắc phải để lần sau không lặp lại nữa. & \bub & \bub & \bub & \bub & \bub \\ \hline
-\textbf{\small 41} & Kể cả khi bài tập rất chán hoặc rất khó, con vẫn cố gắng ép mình ngồi làm cho xong chứ không bỏ dở. & \bub & \bub & \bub & \bub & \bub \\ \hline
-\textbf{\small 42} & Con thường tính toán trước thời gian cần thiết để hoàn thành một bài tập hoặc ôn tập cho một bài kiểm tra. & \bub & \bub & \bub & \bub & \bub \\ \hline
-\textbf{\small 43} & Nếu phương pháp học hiện tại không hiệu quả (làm bài vẫn sai), con sẽ chủ động tìm cách học khác thay thế. & \bub & \bub & \bub & \bub & \bub \\ \hline
-\textbf{\small 44} & Con biết cách tự sắp xếp góc học tập của mình yên tĩnh để không bị tivi, điện thoại làm xao nhãng. & \bub & \bub & \bub & \bub & \bub \\ \hline
+\rowmark & \textbf{\small 1} & So với các bạn khác trong lớp, con nghĩ mình học môn Toán khá tốt. & \bub & \bub & \bub & \bub & \bub \\ \hline
+\rowmark & \textbf{\small 2} & Con thấy những gì mình được học trong môn Toán rất thú vị. & \bub & \bub & \bub & \bub & \bub \\ \hline
+\rowmark & \textbf{\small 3} & Con nghĩ những kiến thức trong môn học Toán rất có ích cho cuộc sống sau này của con. & \bub & \bub & \bub & \bub & \bub \\ \hline
+\rowmark & \textbf{\small 4} & Việc học hiểu rõ bản chất môn học Toán rất quan trọng đối với con. & \bub & \bub & \bub & \bub & \bub \\ \hline
+\rowmark & \textbf{\small 5} & Con thích những bài tập khó của môn Toán vì chúng giúp con học được điều mới. & \bub & \bub & \bub & \bub & \bub \\ \hline
+\rowmark & \textbf{\small 6} & Con tin là mình sẽ hiểu được những kiến thức được dạy trong môn học Toán. & \bub & \bub & \bub & \bub & \bub \\ \hline
+\rowmark & \textbf{\small 7} & Con nghĩ mình biết cách học môn Toán hiệu quả hơn các bạn khác trong lớp. & \bub & \bub & \bub & \bub & \bub \\ \hline
+\rowmark & \textbf{\small 8} & Thường thì con tự muốn học môn Toán hơn là bị bố mẹ hay thầy cô ép buộc. & \bub & \bub & \bub & \bub & \bub \\ \hline
+\rowmark & \textbf{\small 9} & Con tin là mình có thể đạt điểm tốt trong môn học Toán. & \bub & \bub & \bub & \bub & \bub \\ \hline
+\rowmark & \textbf{\small 10} & Con thích cách suy nghĩ và giải quyết vấn đề của môn học Toán. & \bub & \bub & \bub & \bub & \bub \\ \hline
+\rowmark & \textbf{\small 11} & Khi làm bài tập về nhà môn Toán, con cố gắng tự làm một mình mà không cần ai giúp. & \bub & \bub & \bub & \bub & \bub \\ \hline
+\rowmark & \textbf{\small 12} & Con tin là mình có thể làm tốt các bài tập về nhà của môn Toán. & \bub & \bub & \bub & \bub & \bub \\ \hline
+\rowmark & \textbf{\small 13} & Con thấy những tài liệu, sách đọc thêm của môn Toán rất hay. & \bub & \bub & \bub & \bub & \bub \\ \hline
+\rowmark & \textbf{\small 14} & Con nghĩ việc học tốt môn Toán sẽ giúp con học tốt các môn học khác. & \bub & \bub & \bub & \bub & \bub \\ \hline
+\rowmark & \textbf{\small 15} & Con biết mình hoàn toàn có thể học tốt môn Toán nếu cố gắng. & \bub & \bub & \bub & \bub & \bub \\ \hline
+\rowmark & \textbf{\small 16} & Kể cả khi bài tập không bị chấm điểm, con vẫn muốn làm để hiểu bài hơn. & \bub & \bub & \bub & \bub & \bub \\ \hline
+\rowmark & \textbf{\small 17} & Ngay cả khi bài học rất khó, con vẫn tin là mình sẽ hiểu được nếu không bỏ cuộc. & \bub & \bub & \bub & \bub & \bub \\ \hline
+\rowmark & \textbf{\small 18} & Con tin rằng mình có thể giải quyết được những bài tập khó nhất mà thầy cô giao. & \bub & \bub & \bub & \bub & \bub \\ \hline
+\rowmark & \textbf{\small 19} & Khi làm bài thi, con hay nghĩ về việc mình sẽ bị điểm kém và bị mắng. & \bub & \bub & \bub & \bub & \bub \\ \hline
+\rowmark & \textbf{\small 20} & Con hay bị lo lắng và bồn chồn mỗi khi có bài kiểm tra hoặc bài thi. & \bub & \bub & \bub & \bub & \bub \\ \hline
+\rowmark & \textbf{\small 21} & Lúc làm bài kiểm tra, con thấy tim mình đập nhanh hoặc run tay. & \bub & \bub & \bub & \bub & \bub \\ \hline
+\rowmark & \textbf{\small 22} & Nhiều khi con học bài rất kỹ ở nhà, nhưng vào phòng thi lo quá nên lại quên hết. & \bub & \bub & \bub & \bub & \bub \\ \hline
+\rowmark & \textbf{\small 23} & Khi học bài, con thường đọc đi đọc lại các ghi chép hoặc sách giáo khoa để nhớ. & \bub & \bub & \bub & \bub & \bub \\ \hline
+\rowmark & \textbf{\small 24} & Khi nghe giảng, con cố gắng liên hệ những gì thầy cô nói với những điều con đã biết trước đó. & \bub & \bub & \bub & \bub & \bub \\ \hline
+\rowmark & \textbf{\small 25} & Con thường tự vẽ sơ đồ, kẻ bảng hoặc gạch đầu dòng các ý chính để bài học dễ nhìn hơn. & \bub & \bub & \bub & \bub & \bub \\ \hline
+\rowmark & \textbf{\small 26} & Con luôn cố gắng hoàn thành bài tập về nhà đúng hạn chứ không để nước đến chân mới nhảy. & \bub & \bub & \bub & \bub & \bub \\ \hline
+\rowmark & \textbf{\small 27} & Con thường tự đặt câu hỏi cho mình để kiểm tra xem mình đã thực sự hiểu bài chưa. & \bub & \bub & \bub & \bub & \bub \\ \hline
+\rowmark & \textbf{\small 28} & Khi học bài, con thường tự tóm tắt hoặc viết lại bài học theo cách hiểu của riêng con. & \bub & \bub & \bub & \bub & \bub \\ \hline
+\rowmark & \textbf{\small 29} & Trước khi bắt đầu học, con thường tự đặt mục tiêu hôm nay mình sẽ hoàn thành những việc gì. & \bub & \bub & \bub & \bub & \bub \\ \hline
+\rowmark & \textbf{\small 30} & Khi làm bài tập khó, con cố gắng nhớ lại xem thầy cô đã giải các dạng bài tương tự trên lớp như thế nào. & \bub & \bub & \bub & \bub & \bub \\ \hline
+\rowmark & \textbf{\small 31} & Con thường tự nghĩ ra các ví dụ thực tế để hiểu rõ hơn các định nghĩa hoặc công thức. & \bub & \bub & \bub & \bub & \bub \\ \hline
+\rowmark & \textbf{\small 32} & Khi đọc sách hoặc tài liệu mà gặp chỗ không hiểu, con sẽ dừng lại đọc kỹ lại từ đầu hoặc đi hỏi chứ không bỏ qua. & \bub & \bub & \bub & \bub & \bub \\ \hline
+\rowmark & \textbf{\small 33} & Khi ôn thi, con thường xem lại tất cả các bài tập cũ đã làm trong vở. & \bub & \bub & \bub & \bub & \bub \\ \hline
+\rowmark & \textbf{\small 34} & Con biết cách chọn ra những phần kiến thức quan trọng nhất để tập trung ôn tập trước. & \bub & \bub & \bub & \bub & \bub \\ \hline
+\rowmark & \textbf{\small 35} & Con thường nhẩm đi nhẩm lại các từ khóa hoặc quy tắc quan trọng để không bị quên. & \bub & \bub & \bub & \bub & \bub \\ \hline
+\rowmark & \textbf{\small 36} & Trong lúc học, nếu thấy mình bắt đầu mất tập trung hoặc nghĩ chuyện khác, con sẽ chủ động kéo mình quay lại bài học. & \bub & \bub & \bub & \bub & \bub \\ \hline
+\rowmark & \textbf{\small 37} & Con cố gắng tìm mối liên hệ giữa các phần khác nhau của môn học Toán để thấy bức tranh toàn cảnh. & \bub & \bub & \bub & \bub & \bub \\ \hline
+\rowmark & \textbf{\small 38} & Khi đọc sách, con luôn chú ý đến các tiêu đề lớn và phần tóm tắt cuối chương trước. & \bub & \bub & \bub & \bub & \bub \\ \hline
+\rowmark & \textbf{\small 39} & Con thích tự tìm thêm các cách giải khác cho cùng một bài toán/vấn đề. & \bub & \bub & \bub & \bub & \bub \\ \hline
+\rowmark & \textbf{\small 40} & Con thường ghi lại những lỗi sai mình từng mắc phải để lần sau không lặp lại nữa. & \bub & \bub & \bub & \bub & \bub \\ \hline
+\rowmark & \textbf{\small 41} & Kể cả khi bài tập rất chán hoặc rất khó, con vẫn cố gắng ép mình ngồi làm cho xong chứ không bỏ dở. & \bub & \bub & \bub & \bub & \bub \\ \hline
+\rowmark & \textbf{\small 42} & Con thường tính toán trước thời gian cần thiết để hoàn thành một bài tập hoặc ôn tập cho một bài kiểm tra. & \bub & \bub & \bub & \bub & \bub \\ \hline
+\rowmark & \textbf{\small 43} & Nếu phương pháp học hiện tại không hiệu quả (làm bài vẫn sai), con sẽ chủ động tìm cách học khác thay thế. & \bub & \bub & \bub & \bub & \bub \\ \hline
+\rowmark & \textbf{\small 44} & Con biết cách tự sắp xếp góc học tập của mình yên tĩnh để không bị tivi, điện thoại làm xao nhãng. & \bub & \bub & \bub & \bub & \bub \\ \hline
 \end{longtable}
 
 \end{document}

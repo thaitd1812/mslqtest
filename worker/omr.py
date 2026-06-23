@@ -13,106 +13,147 @@ import io
 
 register_heif_opener()
 
-def order_points(pts):
-    rect = np.zeros((4, 2), dtype="float32")
-    s = pts.sum(axis=1)
-    rect[0] = pts[np.argmin(s)] # Top-left
-    rect[2] = pts[np.argmax(s)] # Bottom-right
-    diff = np.diff(pts, axis=1)
-    rect[1] = pts[np.argmin(diff)] # Top-right
-    rect[3] = pts[np.argmax(diff)] # Bottom-left
-    return rect
+# ============================================================
+# Marker-anchored OMR (CPU-only, KHÔNG dùng AI)
+# Phiếu sinh bởi latex_prototype/make_omr_sheet.py:
+#   - 4 ô đen định vị ở 4 góc (mốc TRÊN 6mm > DƯỚI 4mm để nhận chiều)
+#   - cột timing-mark đen bên trái mỗi câu
+#   - mỗi câu 5 bubble tròn (1..5)
+# Luồng: tìm 4 mốc góc -> warp phối cảnh về canvas chuẩn -> Hough tìm bubble
+#        -> cluster thành lưới 5 cột x N hàng -> đo độ tô từng ô -> chọn đáp án.
+# Xử lý nhiều trang: đọc tuần tự, nối các hàng theo thứ tự câu.
+# ============================================================
 
-def four_point_transform(image, pts):
-    rect = order_points(pts)
-    (tl, tr, br, bl) = rect
-    widthA = np.sqrt(((br[0] - bl[0]) ** 2) + ((br[1] - bl[1]) ** 2))
-    widthB = np.sqrt(((tr[0] - tl[0]) ** 2) + ((tr[1] - tl[1]) ** 2))
-    maxWidth = max(int(widthA), int(widthB))
-    heightA = np.sqrt(((tr[0] - br[0]) ** 2) + ((tr[1] - br[1]) ** 2))
-    heightB = np.sqrt(((tl[0] - bl[0]) ** 2) + ((tl[1] - bl[1]) ** 2))
-    maxHeight = max(int(heightA), int(heightB))
-    dst = np.array([
-        [0, 0],
-        [maxWidth - 1, 0],
-        [maxWidth - 1, maxHeight - 1],
-        [0, maxHeight - 1]], dtype="float32")
-    M = cv2.getPerspectiveTransform(rect, dst)
-    warped = cv2.warpPerspective(image, M, (maxWidth, maxHeight))
-    return warped, maxWidth, maxHeight
+CANON_W, CANON_H = 1000, 1414  # canvas chuẩn, giới hạn bởi 4 mốc góc (tỷ lệ ~A4)
+ANSWER_X_MIN = 680             # vùng bubble đáp án bắt đầu từ x này (loại legend bên trái)
 
-def process_omr_opencv(image_path):
-    img = cv2.imread(image_path)
-    if img is None:
-        return False, []
-        
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    edges = cv2.Canny(gray, 50, 150, apertureSize=3)
-    contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    
-    doc_cnt = None
-    if contours:
-        contours = sorted(contours, key=cv2.contourArea, reverse=True)
-        for c in contours:
-            peri = cv2.arcLength(c, True)
-            approx = cv2.approxPolyDP(c, 0.02 * peri, True)
-            if len(approx) == 4:
-                doc_cnt = approx
-                break
-                
-    if doc_cnt is None:
-        print("[OMR] OpenCV failed: no 4-point contour found")
-        return False, []
-        
-    warped, w, h = four_point_transform(img, doc_cnt.reshape(4, 2))
-    warped_gray = cv2.cvtColor(warped, cv2.COLOR_BGR2GRAY)
-    thresh = cv2.adaptiveThreshold(warped_gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 51, 10)
-    
-    expected_rows = 45 
-    row_height = h / expected_rows
-    
-    answers = []
-    cols = [
-        (0.6917, 0.7533),
-        (0.7533, 0.8150),
-        (0.8150, 0.8766),
-        (0.8766, 0.9383),
-        (0.9383, 1.0000)
-    ]
-    
-    for i in range(1, expected_rows):
-        y_start = int(i * row_height)
-        y_end = int((i + 1) * row_height)
-        row_thresh = thresh[y_start:y_end, :]
-        H, W = row_thresh.shape
-        if H == 0: continue
-        
-        densities = []
-        for (start_pct, end_pct) in cols:
-            x_start = int(start_pct * W)
-            x_end = int(end_pct * W)
-            cell = row_thresh[:, x_start:x_end]
-            cell_h, cell_w = cell.shape
-            inner_cell = cell[int(cell_h*0.2):int(cell_h*0.8), int(cell_w*0.2):int(cell_w*0.8)]
-            total_pixels = inner_cell.shape[0] * inner_cell.shape[1]
-            if total_pixels == 0:
-                density = 0
-            else:
-                black_pixels = cv2.countNonZero(inner_cell)
-                density = black_pixels / total_pixels
-            densities.append(density)
-            
-        chosen = np.argmax(densities) + 1
-        max_d = max(densities)
-        if max_d > 0.05:
-            answers.append({"q": i, "v": int(chosen)})
+def _find_corner_markers(gray):
+    """Tìm 4 ô đen vuông gần 4 góc ảnh. Trả về tâm + diện tích từng mốc."""
+    H, W = gray.shape
+    _, th = cv2.threshold(gray, 110, 255, cv2.THRESH_BINARY_INV)
+    frac = 0.16
+    corners = {'tl': (0, 0), 'tr': (W, 0), 'br': (W, H), 'bl': (0, H)}
+    rois = {
+        'tl': (0, 0, int(W*frac), int(H*frac)),
+        'tr': (W-int(W*frac), 0, W, int(H*frac)),
+        'br': (W-int(W*frac), H-int(H*frac), W, H),
+        'bl': (0, H-int(H*frac), int(W*frac), H),
+    }
+    found, areas = {}, {}
+    for k, (x0, y0, x1, y1) in rois.items():
+        sub = th[y0:y1, x0:x1]
+        cnts, _ = cv2.findContours(sub, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        cx0, cy0 = corners[k]
+        best, bestdist = None, 1e18
+        for c in cnts:
+            a = cv2.contourArea(c)
+            if a < 100:
+                continue
+            x, y, w, h = cv2.boundingRect(c)
+            if not (0.6 < w/float(h) < 1.6):     # gần vuông
+                continue
+            if a/float(w*h) < 0.7:               # đặc, không rỗng
+                continue
+            ccx, ccy = x + w/2.0 + x0, y + h/2.0 + y0
+            d = (ccx-cx0)**2 + (ccy-cy0)**2      # ưu tiên ô sát góc nhất
+            if d < bestdist:
+                bestdist, best = d, (ccx, ccy, a)
+        if best:
+            found[k] = (best[0], best[1]); areas[k] = best[2]
+    return found, areas
+
+def _warp_canonical(img, found, areas):
+    """Warp phối cảnh theo 4 mốc; tự lật 180 nếu phiếu bị chụp ngược."""
+    src = np.array([found['tl'], found['tr'], found['br'], found['bl']], dtype="float32")
+    dst = np.array([[0, 0], [CANON_W, 0], [CANON_W, CANON_H], [0, CANON_H]], dtype="float32")
+    warped = cv2.warpPerspective(img, cv2.getPerspectiveTransform(src, dst), (CANON_W, CANON_H))
+    top_area = areas['tl'] + areas['tr']
+    bot_area = areas['bl'] + areas['br']
+    if bot_area > top_area * 1.3:   # mốc "trên" nhỏ hơn "dưới" => ảnh đang lật ngược
+        warped = cv2.rotate(warped, cv2.ROTATE_180)
+    return warped
+
+def _cluster_1d(vals, gap):
+    vals = sorted(vals)
+    groups = [[vals[0]]]
+    for v in vals[1:]:
+        if v - groups[-1][-1] <= gap:
+            groups[-1].append(v)
         else:
-            answers.append({"q": i, "v": 3})
-            
-    print(f"[OMR] OpenCV extracted {len(answers)} answers")
-    if len(answers) == 44:
-        return True, answers
-    return False, answers
+            groups.append([v])
+    return groups
+
+def _detect_grid(warped_gray):
+    """Hough tìm bubble trong vùng đáp án -> cluster thành 5 cột (x) và N hàng (y)."""
+    circles = cv2.HoughCircles(warped_gray, cv2.HOUGH_GRADIENT, dp=1, minDist=18,
+                               param1=120, param2=22, minRadius=8, maxRadius=20)
+    if circles is None:
+        return [], []
+    pts = [(float(x), float(y)) for (x, y, r) in circles[0] if x > ANSWER_X_MIN]
+    if not pts:
+        return [], []
+    col_groups = [g for g in _cluster_1d([p[0] for p in pts], 25) if len(g) >= 3]
+    cols = sorted(float(np.mean(g)) for g in col_groups)
+    # hàng hợp lệ phải có >=4 bubble (loại hàng legend/nhiễu); ô đã tô vẫn còn viền tròn
+    row_groups = [g for g in _cluster_1d([p[1] for p in pts], 18) if len(g) >= 4]
+    rows = sorted(float(np.mean(g)) for g in row_groups)
+    return cols, rows
+
+def _read_page(warped_gray, cols, rows, r=12):
+    """Đo độ tô từng ô; chọn ô đậm nhất. Gắn cờ blank/multi để biết độ tin cậy."""
+    _, th = cv2.threshold(warped_gray, 130, 255, cv2.THRESH_BINARY_INV)
+    out = []
+    for ry in rows:
+        fills = []
+        for cx in cols:
+            cell = th[max(0, int(ry-r)):int(ry+r), max(0, int(cx-r)):int(cx+r)]
+            fills.append(cell.mean()/255.0 if cell.size else 0.0)
+        fills = np.array(fills)
+        order = np.argsort(fills)[::-1]
+        top = float(fills[order[0]])
+        second = float(fills[order[1]]) if len(fills) > 1 else 0.0
+        if top < 0.25:                                   # không ô nào được tô rõ
+            out.append({"v": 3, "flag": "blank"})
+        elif second > 0.55*top and second > 0.25:        # tô >1 ô
+            out.append({"v": int(order[0])+1, "flag": "multi"})
+        else:
+            out.append({"v": int(order[0])+1, "flag": "ok"})
+    return out
+
+def process_omr_markers(jpeg_images, expected=44):
+    """OMR truyền thống dựa trên mốc định vị, cho 1..N trang theo thứ tự. CPU, không AI."""
+    all_rows = []
+    for idx, img_bytes in enumerate(jpeg_images):
+        nparr = np.frombuffer(img_bytes, np.uint8)
+        img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+        if img is None:
+            print(f"[OMR] marker: page {idx+1} decode failed")
+            return False, []
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        found, areas = _find_corner_markers(gray)
+        if len(found) != 4:
+            print(f"[OMR] marker: page {idx+1} found {len(found)}/4 corners")
+            return False, []
+        warped = _warp_canonical(img, found, areas)
+        wg = cv2.cvtColor(warped, cv2.COLOR_BGR2GRAY)
+        cols, rows = _detect_grid(wg)
+        if len(cols) != 5:
+            print(f"[OMR] marker: page {idx+1} found {len(cols)} cols (expected 5)")
+            return False, []
+        page_rows = _read_page(wg, cols, rows)
+        print(f"[OMR] marker: page {idx+1} -> {len(page_rows)} rows")
+        all_rows.extend(page_rows)
+
+    if len(all_rows) != expected:
+        print(f"[OMR] marker: total rows {len(all_rows)} != {expected}")
+        return False, []
+    uncertain = sum(1 for a in all_rows if a["flag"] != "ok")
+    if uncertain > 6:
+        print(f"[OMR] marker: too many uncertain rows ({uncertain}) -> fallback to AI")
+        return False, []
+    answers = [{"q": i+1, "v": a["v"]} for i, a in enumerate(all_rows)]
+    print(f"[OMR] marker: OK -> {expected} answers ({uncertain} uncertain)")
+    return True, answers
 
 async def process_omr_gemini_async(jpeg_images: list[bytes]):
     print(f"[OMR] Using Gemini Vision for {len(jpeg_images)} images...")
@@ -238,20 +279,16 @@ async def process_files_async(files_data):
             
     if len(jpeg_images) == 0:
         return {"success": False, "error": "No valid images found"}
-        
-    if len(jpeg_images) == 1:
-        temp_path = "/tmp/temp_cv2.jpg"
-        with open(temp_path, "wb") as f_out:
-            f_out.write(jpeg_images[0])
-            
-        success, answers = process_omr_opencv(temp_path)
-        if success and len(answers) == 44:
-            return build_final_result(answers)
-            
-    # Fallback to Gemini for multiple images or OpenCV failure
+
+    # Primary: OMR truyền thống dựa trên mốc định vị (CPU, không AI), cho mọi số trang
+    success, answers = process_omr_markers(jpeg_images)
+    if success and len(answers) == 44:
+        return build_final_result(answers)
+
+    # Fallback: Gemini khi pipeline mốc thất bại (ảnh quá xấu, thiếu mốc, v.v.)
     success, answers = await process_omr_gemini_async(jpeg_images)
-    
+
     if not success:
          return {"success": False, "error": "Hệ thống AI đang quá tải hoặc cạn kiệt API Limit. Vui lòng chờ 1 lát rồi thử lại!"}
-         
+
     return build_final_result(answers)

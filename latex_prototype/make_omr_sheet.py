@@ -41,6 +41,13 @@ PREAMBLE = r"""\documentclass[14pt, a4paper]{extarticle}
 \fancyhead[L]{\includegraphics[height=1.5cm]{../Logo4.png}}
 \fancyhead[C]{%
   \tikz[remember picture,overlay] \node[opacity=0.2,inner sep=0pt,rotate=60] at (current page.center){\includegraphics[width=0.8\paperwidth]{../Watermark_Opacity_20.png}};%
+  % ===== MỐC ĐỊNH VỊ 4 GÓC (fiducial) — vẽ mọi trang. Mốc TRÊN to (6mm), DƯỚI nhỏ (4mm) để nhận chiều phiếu.
+  \begin{tikzpicture}[remember picture,overlay]
+    \fill[black] ([shift={( 7mm,-7mm)}]current page.north west) rectangle ++( 6mm,-6mm);
+    \fill[black] ([shift={(-7mm,-7mm)}]current page.north east) rectangle ++(-6mm,-6mm);
+    \fill[black] ([shift={( 7mm, 7mm)}]current page.south west) rectangle ++( 4mm, 4mm);
+    \fill[black] ([shift={(-7mm, 7mm)}]current page.south east) rectangle ++(-4mm, 4mm);
+  \end{tikzpicture}%
 }
 \fancyfoot[C]{%
   \fontsize{8pt}{10pt}\selectfont\color{muted}%
@@ -59,6 +66,8 @@ PREAMBLE = r"""\documentclass[14pt, a4paper]{extarticle}
 
 % Ô tròn to để tô tay (thu nhỏ chút)
 \newcommand{\bub}{\tikz[baseline=-0.6ex]{\draw[line width=0.8pt,color=ink] (0,0) circle (1.6mm);}}
+% Ô mốc định vị DÒNG (timing mark) — 1 ô đen đặc ở đầu mỗi câu, giúp OMR locate dòng dù cao-thấp khác nhau
+\newcommand{\rowmark}{\rule{4mm}{4mm}}
 % Số có vòng tròn cho legend
 \newcommand{\cnum}[1]{\tikz[baseline=-0.6ex]{\draw[line width=0.7pt,color=ink] (0,0) circle (1.6mm); \node[font=\bfseries\scriptsize]{#1};}}
 
@@ -105,14 +114,14 @@ PREAMBLE = r"""\documentclass[14pt, a4paper]{extarticle}
 \setlength{\arrayrulewidth}{0.5pt}
 \setlength{\tabcolsep}{3pt}
 \renewcommand{\arraystretch}{1.05}
-\begin{longtable}{|M{0.8cm}|L{11.5cm}|M{0.8cm}|M{0.8cm}|M{0.8cm}|M{0.8cm}|M{0.8cm}|}
+\begin{longtable}{|M{0.5cm}|M{0.8cm}|L{10.6cm}|M{0.8cm}|M{0.8cm}|M{0.8cm}|M{0.8cm}|M{0.8cm}|}
 \hline
 \rowcolor{headfill}
-\textbf{\small Câu} & \textbf{\small Nội dung} & \textbf{\small 1} & \textbf{\small 2} & \textbf{\small 3} & \textbf{\small 4} & \textbf{\small 5} \\ \hline
+ & \textbf{\small Câu} & \textbf{\small Nội dung} & \textbf{\small 1} & \textbf{\small 2} & \textbf{\small 3} & \textbf{\small 4} & \textbf{\small 5} \\ \hline
 \endfirsthead
 \hline
 \rowcolor{headfill}
-\textbf{\small Câu} & \textbf{\small Nội dung} & \textbf{\small 1} & \textbf{\small 2} & \textbf{\small 3} & \textbf{\small 4} & \textbf{\small 5} \\ \hline
+ & \textbf{\small Câu} & \textbf{\small Nội dung} & \textbf{\small 1} & \textbf{\small 2} & \textbf{\small 3} & \textbf{\small 4} & \textbf{\small 5} \\ \hline
 \endhead
 \hline
 \endfoot
@@ -133,7 +142,7 @@ def build_rows():
     rows = []
     bubbles = " & ".join([r"\bub"] * 5)
     for i, q in enumerate(MSLQ_QUESTIONS, start=1):
-        rows.append(r"\textbf{\small %d} & %s & %s \\ \hline" % (i, _esc(q), bubbles))
+        rows.append(r"\rowmark & \textbf{\small %d} & %s & %s \\ \hline" % (i, _esc(q), bubbles))
     return "\n".join(rows)
 
 
