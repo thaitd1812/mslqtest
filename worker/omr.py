@@ -13,9 +13,6 @@ import io
 
 register_heif_opener()
 
-# Semaphore to prevent Thundering Herd on Gemini API free keys (Set to 3 matching 3 API keys)
-gemini_semaphore = asyncio.Semaphore(3)
-
 def order_points(pts):
     rect = np.zeros((4, 2), dtype="float32")
     s = pts.sum(axis=1)
@@ -169,8 +166,7 @@ async def process_omr_gemini_async(jpeg_images: list[bytes]):
             url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
             try:
                 async with httpx.AsyncClient(timeout=60.0) as client:
-                    async with gemini_semaphore:
-                        resp = await client.post(url, json=payload)
+                    resp = await client.post(url, json=payload)
                     if resp.status_code == 429:
                         print(f"[OMR] Rate limited on Key {key_idx + 1}. Switching to next key...")
                         continue
@@ -256,6 +252,6 @@ async def process_files_async(files_data):
     success, answers = await process_omr_gemini_async(jpeg_images)
     
     if not success:
-         return {"success": False, "error": "Could not extract answers"}
+         return {"success": False, "error": "Hệ thống AI đang quá tải hoặc cạn kiệt API Limit. Vui lòng chờ 1 lát rồi thử lại!"}
          
     return build_final_result(answers)
