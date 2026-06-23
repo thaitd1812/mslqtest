@@ -13,8 +13,8 @@ import io
 
 register_heif_opener()
 
-# Semaphore to prevent Thundering Herd on Gemini API free keys
-gemini_semaphore = asyncio.Semaphore(1)
+# Semaphore to prevent Thundering Herd on Gemini API free keys (Set to 3 matching 3 API keys)
+gemini_semaphore = asyncio.Semaphore(3)
 
 def order_points(pts):
     rect = np.zeros((4, 2), dtype="float32")
