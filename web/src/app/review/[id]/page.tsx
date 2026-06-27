@@ -90,7 +90,14 @@ export default function ReviewPage() {
         <div className="flex h-screen bg-gray-100 p-4 gap-4 font-sans">
             {/* Cột trái: Ảnh */}
             <div className="flex-1 bg-white rounded-xl shadow p-4 overflow-hidden flex flex-col">
-                <h2 className="text-xl font-bold mb-4">Ảnh gốc đã upload</h2>
+                <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-xl font-bold">Ảnh gốc đã upload</h2>
+                    {studentInfo && (
+                        <div className="text-sm bg-indigo-50 text-indigo-700 px-3 py-1 rounded-md font-medium border border-indigo-100">
+                            Học sinh: {studentInfo.name} ({studentInfo.dob})
+                        </div>
+                    )}
+                </div>
                 <div className="flex-1 bg-gray-200 rounded border border-gray-300 overflow-y-auto">
                     {imageUrls.length > 0 ? (
                         imageUrls.map((url, idx) => (
