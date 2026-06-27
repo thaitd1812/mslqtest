@@ -90,11 +90,23 @@ CLEAN_YS = [
     [156.0, 250.0, 344.1, 438.5]
 ]
 PAGE_STARTS = [1, 9, 26, 41]
-FIXED_COLS = [724.0, 786.0, 848.0, 910.0, 972.0]
+CLEAN_COLS = [721.0, 775.0, 829.0, 882.0, 936.0]
 
 def _detect_grid(warped_gray, page_idx):
-    """Tìm timing-mark bằng template matching để xác định chính xác vị trí hàng."""
+    """Tìm timing-mark bằng template matching để xác định chính xác vị trí hàng. Tìm cột bằng HoughCircles."""
     _, th = cv2.threshold(warped_gray, 130, 255, cv2.THRESH_BINARY_INV)
+    
+    # 1. TÌM CỘT BẰNG HOUGH CIRCLES
+    circles = cv2.HoughCircles(warped_gray, cv2.HOUGH_GRADIENT, dp=1, minDist=18,
+                               param1=120, param2=22, minRadius=8, maxRadius=20)
+    cols = CLEAN_COLS
+    if circles is not None:
+        pts = [(float(x), float(y)) for (x, y, r) in circles[0] if x > ANSWER_X_MIN]
+        col_groups = [g for g in _cluster_1d([p[0] for p in pts], 25) if len(g) >= 3]
+        if len(col_groups) == 5:
+            cols = sorted(float(np.mean(g)) for g in col_groups)
+            
+    # 2. TÌM HÀNG BẰNG TEMPLATE MATCHING (ANCHOR)
     template = np.zeros((25, 25), dtype=np.uint8)
     template[5:20, 5:20] = 255 
     
@@ -108,7 +120,7 @@ def _detect_grid(warped_gray, page_idx):
         marks.append((pt[1] + 25/2.0, res[pt[1], pt[0]]))
         
     if not marks:
-        return FIXED_COLS, [], 1
+        return cols, [], 1
         
     marks.sort(key=lambda x: x[0])
     groups = [[marks[0]]]
@@ -134,14 +146,14 @@ def _detect_grid(warped_gray, page_idx):
             valid_anchors.append((p_y, p_score, best_k, expected_ys[best_k]))
                 
     if not valid_anchors:
-        return FIXED_COLS, [], PAGE_STARTS[page_idx]
+        return cols, [], PAGE_STARTS[page_idx]
         
     best_anchor = max(valid_anchors, key=lambda x: x[1])
     best_y, best_score, best_k, exp_y = best_anchor
     
     shift = best_y - exp_y
     rows = [ey + shift for ey in expected_ys]
-    return FIXED_COLS, rows, PAGE_STARTS[page_idx]
+    return cols, rows, PAGE_STARTS[page_idx]
 
 def _read_page(warped_gray, cols, rows, r=12):
     """Đo độ tô từng ô; chọn ô đậm nhất. Gắn cờ blank/multi để biết độ tin cậy."""
