@@ -215,7 +215,7 @@ def process_omr_markers(jpeg_images, expected=44):
         return False, []
         
     all_rows.sort(key=lambda x: x.get('q', 0))
-    answers = [{"q": a["q"], "v": a["v"]} for a in all_rows]
+    answers = [{"q": a["q"], "v": a["v"], "flag": a.get("flag", "ok")} for a in all_rows]
     print(f"[OMR] marker: OK -> {expected} answers ({uncertain} uncertain)")
     return True, answers
 
@@ -297,11 +297,13 @@ async def process_omr_gemini_async(jpeg_images: list[bytes]):
 
 def build_final_result(answers):
     final_answers = []
-    found_qs = {a["q"]: a["v"] for a in answers if "q" in a and "v" in a}
+    found_qs = {a["q"]: a for a in answers if "q" in a}
     for q_idx in range(1, 45):
+        ans = found_qs.get(q_idx, {"v": 3, "flag": "blank"})
         final_answers.append({
             "q": q_idx,
-            "v": found_qs.get(q_idx, 3) # default 3
+            "v": ans.get("v", 3),
+            "flag": ans.get("flag", "blank")
         })
     return {
         "success": True,

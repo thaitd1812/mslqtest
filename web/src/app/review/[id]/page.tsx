@@ -28,10 +28,10 @@ export default function ReviewPage() {
         if (!id) return;
         supabase.from('mslq_results').select('*').eq('id', id).single().then(({data, error}) => {
             if (data && data.answers_jsonb) {
-                const mapped = data.answers_jsonb.map((a: { q: number; v: number }) => ({
+                const mapped = data.answers_jsonb.map((a: { q: number; v: number; flag?: string }) => ({
                     cau: a.q,
                     chon: a.v,
-                    flag: a.v === 3 // if missing/blank, mark as flag
+                    flag: (a.flag && a.flag !== 'ok') ? true : false
                 }));
                 // Sort by question number
                 mapped.sort((a: Answer, b: Answer) => a.cau - b.cau);
