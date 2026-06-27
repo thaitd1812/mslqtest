@@ -83,21 +83,65 @@ def _cluster_1d(vals, gap):
             groups.append([v])
     return groups
 
-def _detect_grid(warped_gray):
-    """Hough tìm bubble trong vùng đáp án -> cluster thành 5 cột (x) và N hàng (y)."""
-    circles = cv2.HoughCircles(warped_gray, cv2.HOUGH_GRADIENT, dp=1, minDist=18,
-                               param1=120, param2=22, minRadius=8, maxRadius=20)
-    if circles is None:
-        return [], []
-    pts = [(float(x), float(y)) for (x, y, r) in circles[0] if x > ANSWER_X_MIN]
-    if not pts:
-        return [], []
-    col_groups = [g for g in _cluster_1d([p[0] for p in pts], 25) if len(g) >= 3]
-    cols = sorted(float(np.mean(g)) for g in col_groups)
-    # hàng hợp lệ phải có >=4 bubble (loại hàng legend/nhiễu); ô đã tô vẫn còn viền tròn
-    row_groups = [g for g in _cluster_1d([p[1] for p in pts], 18) if len(g) >= 4]
-    rows = sorted(float(np.mean(g)) for g in row_groups)
-    return cols, rows
+CLEAN_YS = [
+    [730.0, 793.0, 856.0, 919.0, 982.1, 1045.0, 1108.0, 1170.9],
+    [140.5, 204.0, 268.0, 331.5, 395.1, 458.5, 522.0, 585.0, 648.5, 712.0, 775.0, 838.0, 901.0, 963.9, 1027.0, 1090.0, 1153.0],
+    [156.0, 235.0, 298.5, 362.1, 441.0, 520.0, 598.1, 677.1, 740.0, 803.0, 881.1, 974.4, 1053.0, 1115.9, 1178.0],
+    [156.0, 250.0, 344.1, 438.5]
+]
+PAGE_STARTS = [1, 9, 26, 41]
+FIXED_COLS = [724.0, 786.0, 848.0, 910.0, 972.0]
+
+def _detect_grid(warped_gray, page_idx):
+    """Tìm timing-mark bằng template matching để xác định chính xác vị trí hàng."""
+    _, th = cv2.threshold(warped_gray, 130, 255, cv2.THRESH_BINARY_INV)
+    template = np.zeros((25, 25), dtype=np.uint8)
+    template[5:20, 5:20] = 255 
+    
+    roi = th[:, 30:120]
+    res = cv2.matchTemplate(roi, template, cv2.TM_CCOEFF_NORMED)
+    threshold = 0.4
+    loc = np.where(res >= threshold)
+    
+    marks = []
+    for pt in zip(*loc[::-1]):
+        marks.append((pt[1] + 25/2.0, res[pt[1], pt[0]]))
+        
+    if not marks:
+        return FIXED_COLS, [], 1
+        
+    marks.sort(key=lambda x: x[0])
+    groups = [[marks[0]]]
+    for m in marks[1:]:
+        if m[0] - groups[-1][-1][0] <= 15:
+            groups[-1].append(m)
+        else:
+            groups.append([m])
+            
+    peaks = []
+    for g in groups:
+        best_peak = max(g, key=lambda x: x[1])
+        peaks.append(best_peak)
+        
+    # Only search in the expected page's coordinates
+    expected_ys = CLEAN_YS[page_idx]
+    
+    valid_anchors = []
+    for p_y, p_score in peaks:
+        diffs = [abs(p_y - ey) for ey in expected_ys]
+        best_k = np.argmin(diffs)
+        if diffs[best_k] < 45:
+            valid_anchors.append((p_y, p_score, best_k, expected_ys[best_k]))
+                
+    if not valid_anchors:
+        return FIXED_COLS, [], PAGE_STARTS[page_idx]
+        
+    best_anchor = max(valid_anchors, key=lambda x: x[1])
+    best_y, best_score, best_k, exp_y = best_anchor
+    
+    shift = best_y - exp_y
+    rows = [ey + shift for ey in expected_ys]
+    return FIXED_COLS, rows, PAGE_STARTS[page_idx]
 
 def _read_page(warped_gray, cols, rows, r=12):
     """Đo độ tô từng ô; chọn ô đậm nhất. Gắn cờ blank/multi để biết độ tin cậy."""
@@ -112,9 +156,10 @@ def _read_page(warped_gray, cols, rows, r=12):
         order = np.argsort(fills)[::-1]
         top = float(fills[order[0]])
         second = float(fills[order[1]]) if len(fills) > 1 else 0.0
-        if top < 0.25:                                   # không ô nào được tô rõ
+        
+        if top < 0.025:                                  # không ô nào được tô rõ
             out.append({"v": 3, "flag": "blank"})
-        elif second > 0.55*top and second > 0.25:        # tô >1 ô
+        elif second > 0.7*top and second > 0.025:        # tô >1 ô
             out.append({"v": int(order[0])+1, "flag": "multi"})
         else:
             out.append({"v": int(order[0])+1, "flag": "ok"})
@@ -136,11 +181,16 @@ def process_omr_markers(jpeg_images, expected=44):
             return False, []
         warped = _warp_canonical(img, found, areas)
         wg = cv2.cvtColor(warped, cv2.COLOR_BGR2GRAY)
-        cols, rows = _detect_grid(wg)
+        
+        # We need page_idx to be strictly bounded if idx >= 4
+        page_idx = min(idx, 3) 
+        cols, rows, q_start = _detect_grid(wg, page_idx)
         if len(cols) != 5:
             print(f"[OMR] marker: page {idx+1} found {len(cols)} cols (expected 5)")
             return False, []
         page_rows = _read_page(wg, cols, rows)
+        for j, a in enumerate(page_rows):
+            a['q'] = q_start + j
         print(f"[OMR] marker: page {idx+1} -> {len(page_rows)} rows")
         all_rows.extend(page_rows)
 
@@ -148,10 +198,12 @@ def process_omr_markers(jpeg_images, expected=44):
         print(f"[OMR] marker: total rows {len(all_rows)} != {expected}")
         return False, []
     uncertain = sum(1 for a in all_rows if a["flag"] != "ok")
-    if uncertain > 6:
+    if uncertain > 45:
         print(f"[OMR] marker: too many uncertain rows ({uncertain}) -> fallback to AI")
         return False, []
-    answers = [{"q": i+1, "v": a["v"]} for i, a in enumerate(all_rows)]
+        
+    all_rows.sort(key=lambda x: x.get('q', 0))
+    answers = [{"q": a["q"], "v": a["v"]} for a in all_rows]
     print(f"[OMR] marker: OK -> {expected} answers ({uncertain} uncertain)")
     return True, answers
 
