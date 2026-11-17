@@ -1,33 +1,80 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-export function middleware(req: NextRequest) {
-  // Only protect /dashboard and /api/export
-  if (req.nextUrl.pathname.startsWith('/dashboard') || req.nextUrl.pathname.startsWith('/api/export')) {
-    const basicAuth = req.headers.get('authorization');
-    const url = req.nextUrl;
+const AUTH_COOKIE = 'mslq_dash';
+const VALID_USER = 'admin';
 
-    if (basicAuth) {
-      const authValue = basicAuth.split(' ')[1];
-      const [user, pwd] = atob(authValue).split(':');
+function validPassword() {
+  // Mật khẩu mặc định để chạy được ngay; đặt DASHBOARD_PASSWORD để đổi.
+  return process.env.DASHBOARD_PASSWORD || 'Mathtech123456';
+}
 
-      const validUser = 'admin';
-      // Khởi tạo Mật khẩu cứng (Không cần cấu hình Vercel)
-      // Bạn có thể đổi chữ 'matkhau123' thành bất cứ pass nào bạn muốn
-      const validPassword = process.env.DASHBOARD_PASSWORD || 'Mathtech123456';
+/** Token đặt trong cookie — hash của thông tin đăng nhập, không phải mật khẩu thô. */
+async function sessionToken(): Promise<string> {
+  const data = new TextEncoder().encode(`${VALID_USER}:${validPassword()}`);
+  const digest = await crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(digest))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
+}
 
-      if (user === validUser && pwd === validPassword) {
-        return NextResponse.next();
-      }
+function hasValidBasicHeader(req: NextRequest): boolean {
+  const header = req.headers.get('authorization');
+  if (!header?.startsWith('Basic ')) return false;
+  try {
+    const [user, pwd] = atob(header.split(' ')[1]).split(':');
+    return user === VALID_USER && pwd === validPassword();
+  } catch {
+    return false;
+  }
+}
+
+async function isAuthed(req: NextRequest): Promise<boolean> {
+  if (hasValidBasicHeader(req)) return true;
+  const cookie = req.cookies.get(AUTH_COOKIE)?.value;
+  return !!cookie && cookie === (await sessionToken());
+}
+
+export async function middleware(req: NextRequest) {
+  const { pathname } = req.nextUrl;
+
+  // 1. Thao tác thay đổi dữ liệu (xoá bài) — chỉ người đã đăng nhập dashboard.
+  //    GET vẫn mở vì phụ huynh xem kết quả qua link chứa UUID không đoán được.
+  //    /api/scan-sheet (nhập phiếu hàng loạt) ghi thẳng vào dữ liệu nghiên cứu nên cũng khoá.
+  if (
+    (pathname.startsWith('/api/results') && req.method !== 'GET') ||
+    pathname.startsWith('/api/scan-sheet')
+  ) {
+    if (!(await isAuthed(req))) {
+      return NextResponse.json(
+        { error: 'Không có quyền thực hiện thao tác này. Hãy đăng nhập lại trang quản trị.' },
+        { status: 403 }
+      );
     }
-    
-    url.pathname = '/api/auth'; // Not actually used, just standard basic auth trigger
-    
+    return NextResponse.next();
+  }
+
+  // 2. Trang quản trị và xuất CSV — basic auth như cũ.
+  if (pathname.startsWith('/dashboard') || pathname.startsWith('/api/export')) {
+    if (await isAuthed(req)) {
+      const res = NextResponse.next();
+      // Ghi cookie phiên: trình duyệt không tự gửi header Basic sang /api/results,
+      // nên nút Xoá trên dashboard cần cookie này để được xác thực.
+      if (hasValidBasicHeader(req)) {
+        res.cookies.set(AUTH_COOKIE, await sessionToken(), {
+          httpOnly: true,
+          sameSite: 'strict',
+          secure: process.env.NODE_ENV === 'production',
+          path: '/',
+          maxAge: 60 * 60 * 8,
+        });
+      }
+      return res;
+    }
+
     return new NextResponse('Auth required', {
       status: 401,
-      headers: {
-        'WWW-Authenticate': 'Basic realm="Secure Area"',
-      },
+      headers: { 'WWW-Authenticate': 'Basic realm="Secure Area"' },
     });
   }
 
@@ -35,5 +82,5 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/api/export/:path*'],
+  matcher: ['/dashboard/:path*', '/api/export/:path*', '/api/results/:path*', '/api/scan-sheet/:path*'],
 };

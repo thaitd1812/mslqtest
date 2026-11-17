@@ -1,0 +1,45 @@
+{
+ "type": "object",
+ "properties": {
+  "findings": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "properties": {
+     "file": {
+      "type": "string"
+     },
+     "line": {
+      "type": "integer"
+     },
+     "severity": {
+      "type": "string",
+      "enum": [
+       "cao",
+       "trung-binh",
+       "thap"
+      ]
+     },
+     "summary": {
+      "type": "string"
+     },
+     "scenario": {
+      "type": "string"
+     },
+     "fix": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "file",
+     "severity",
+     "summary",
+     "scenario"
+    ]
+   }
+  }
+ },
+ "required": [
+  "findings"
+ ]
+}

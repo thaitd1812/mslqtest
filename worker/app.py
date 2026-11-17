@@ -9,6 +9,7 @@ import httpx
 from pydantic import BaseModel
 
 import omr
+import omr_sheet
 import render
 
 app = FastAPI(title="MSLQ Worker", version="1.0.0")
@@ -71,6 +72,14 @@ async def process_omr(req: OMRRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.post("/omr/sheet", dependencies=[Depends(verify_token)])
+def process_omr_sheet(req: FileData):
+    """Phiếu MSLQ 1 trang: một ảnh = một học sinh (dùng cho nhập hàng loạt)."""
+    try:
+        return omr_sheet.read_sheet(base64.b64decode(req.content_b64))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 @app.post("/render", dependencies=[Depends(verify_token)])
 async def process_render(req: RenderRequest):
     try:
@@ -86,8 +95,11 @@ async def process_render(req: RenderRequest):
             
         upload_endpoint = f"{supabase_url}/storage/v1/object/mslq-reports/{req.upload_path}"
         
+        # Key kiểu mới (sb_secret_...) không phải JWT: Supabase nhận nó qua header "apikey".
+        # Key service_role kiểu cũ (JWT) thì gửi thêm Authorization Bearer như trước.
         headers = {
-            "Authorization": f"Bearer {supabase_key}",
+            "apikey": supabase_key,
+            **({} if supabase_key.startswith("sb_") else {"Authorization": f"Bearer {supabase_key}"}),
             "Content-Type": "application/pdf",
             "x-upsert": "true"
         }

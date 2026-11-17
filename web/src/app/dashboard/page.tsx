@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseServer } from '@/lib/supabase/server';
 import Link from 'next/link';
 import { ArrowLeft, Download, FileText, CheckCircle, Clock } from 'lucide-react';
 import DeleteButton from '@/components/DeleteButton';
@@ -7,10 +7,7 @@ export const dynamic = 'force-dynamic';
 
 export default async function DashboardPage(props: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
   const searchParams = await props.searchParams;
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://vocjtovsupecsfpzqzvk.supabase.co',
-    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZvY2p0b3ZzdXBlY3NmcHpxenZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE0OTkxMTMsImV4cCI6MjA5NzA3NTExM30.ZKtQMrF2YDKKMfeTFfbj89rKy9J1TJ2TYNG5_2e9SXI'
-  );
+  const supabase = getSupabaseServer();
 
   const statusFilter = searchParams.status === 'review' ? 'review' : (searchParams.status === 'all' ? 'all' : 'completed');
 
@@ -65,13 +62,21 @@ export default async function DashboardPage(props: { searchParams: Promise<{ [ke
             </div>
           </div>
           
-          <Link 
-            href="/api/export"
-            className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-medium transition-all shadow-sm hover:shadow active:scale-95"
-          >
-            <Download className="w-4 h-4" />
-            <span>Xuất Excel (CSV)</span>
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link
+              href="/dashboard/nhap-phieu"
+              className="flex items-center gap-2 bg-white border border-indigo-200 text-indigo-700 hover:bg-indigo-50 px-5 py-2.5 rounded-xl font-medium transition-all"
+            >
+              <span>Nhập phiếu hàng loạt</span>
+            </Link>
+            <Link
+              href="/api/export"
+              className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-medium transition-all shadow-sm hover:shadow active:scale-95"
+            >
+              <Download className="w-4 h-4" />
+              <span>Xuất Excel (CSV)</span>
+            </Link>
+          </div>
         </div>
 
         {/* Table */}

@@ -26,3 +26,9 @@ web/public/uploads/*
 # OS Files
 .DS_Store
 Thumbs.db
+
+# Hàng đợi việc giao Gemini (scripts/gemini/tho.py)
+storage/gemini/
+
+# Dữ liệu học sinh (đã ẩn danh) — không commit
+data_private/

@@ -1,13 +1,10 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseServer } from '@/lib/supabase/server';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://vocjtovsupecsfpzqzvk.supabase.co',
-    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZvY2p0b3ZzdXBlY3NmcHpxenZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE0OTkxMTMsImV4cCI6MjA5NzA3NTExM30.ZKtQMrF2YDKKMfeTFfbj89rKy9J1TJ2TYNG5_2e9SXI'
-  );
+  const supabase = getSupabaseServer();
 
   const { data: results, error } = await supabase
     .from('mslq_results')
@@ -25,7 +22,10 @@ export async function GET() {
     'Ho va ten', 
     'Nam sinh', 
     'SDT phu huynh',
-    'Niem tin nang luc', 
+    'Ma HS',
+    'Lan',
+    'Nguon',
+    'Niem tin nang luc',
     'Gia tri va hung thu', 
     'Lo au kiem tra', 
     'Chien luoc hoc tap', 
@@ -59,6 +59,9 @@ export async function GET() {
       `"${meta.studentName || ''}"`,
       `"${meta.studentDob || ''}"`,
       meta.parentPhone ? `="""${meta.parentPhone}"""` : '""',
+      meta.studentCode ? `="""${meta.studentCode}"""` : '""',
+      `"${meta.round || ''}"`,
+      `"${meta.source || 'omr'}"`,
       scores['Niềm tin vào năng lực học tập'] ? Number(scores['Niềm tin vào năng lực học tập']).toFixed(1) : '',
       scores['Giá trị và hứng thú học tập'] ? Number(scores['Giá trị và hứng thú học tập']).toFixed(1) : '',
       scores['Lo âu khi kiểm tra'] ? Number(scores['Lo âu khi kiểm tra']).toFixed(1) : '',

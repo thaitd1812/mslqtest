@@ -1,18 +1,20 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://vocjtovsupecsfpzqzvk.supabase.co',
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZvY2p0b3ZzdXBlY3NmcHpxenZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE0OTkxMTMsImV4cCI6MjA5NzA3NTExM30.ZKtQMrF2YDKKMfeTFfbj89rKy9J1TJ2TYNG5_2e9SXI'
-);
 
 interface Answer {
     cau: number;
-    chon: number;
+    chon: number | null;
     flag: boolean;
+    note: string;
 }
+
+const FLAG_NOTE: Record<string, string> = {
+    blank: 'Bỏ trống',
+    multi: 'Tô nhiều ô',
+    dominant: 'Có vết bẩn, nên soát',
+    check: 'Tô mờ, nên soát',
+};
 
 export default function ReviewPage() {
     const { id } = useParams();
@@ -23,51 +25,82 @@ export default function ReviewPage() {
     const [isFinalizing, setIsFinalizing] = useState(false);
     const [imageUrls, setImageUrls] = useState<string[]>([]);
     const [studentInfo, setStudentInfo] = useState<{name: string, dob: string} | null>(null);
+    // Phiếu 1 trang (nhập hàng loạt) mang mã học sinh + lần khảo sát; giáo viên sửa được khi máy đọc sai.
+    const [sheetMeta, setSheetMeta] = useState<{ code: string; round: string; issues: string[] } | null>(null);
 
     useEffect(() => {
         if (!id) return;
-        supabase.from('mslq_results').select('*').eq('id', id).single().then(({data, error}) => {
-            if (data && data.answers_jsonb) {
-                const mapped = data.answers_jsonb.map((a: { q: number; v: number; flag?: string }) => ({
-                    cau: a.q,
-                    chon: a.v,
-                    flag: (a.flag && a.flag !== 'ok') ? true : false
-                }));
-                // Sort by question number
-                mapped.sort((a: Answer, b: Answer) => a.cau - b.cau);
-                setAnswers(mapped);
+        // Đi qua API route thay vì gọi thẳng Supabase: trình duyệt không còn giữ
+        // key nào đọc được database.
+        fetch(`/api/results/${id}`)
+            .then((res) => (res.ok ? res.json() : null))
+            .then((data) => {
+                if (data && data.answers_jsonb) {
+                    const mapped = data.answers_jsonb.map((a: { q: number; v: number | null; flag?: string }) => ({
+                        cau: a.q,
+                        chon: a.v ?? null,
+                        flag: (a.flag && a.flag !== 'ok') ? true : false,
+                        note: (a.flag && FLAG_NOTE[a.flag]) || 'Thiếu đáp án'
+                    }));
+                    // Sort by question number
+                    mapped.sort((a: Answer, b: Answer) => a.cau - b.cau);
+                    setAnswers(mapped);
 
-                if (data.photo_url) {
-                    try {
-                        const urls = JSON.parse(data.photo_url);
-                        setImageUrls(urls);
-                    } catch {
-                        setImageUrls([data.photo_url]);
+                    if (data.photo_url) {
+                        try {
+                            const urls = JSON.parse(data.photo_url);
+                            setImageUrls(urls);
+                        } catch {
+                            setImageUrls([data.photo_url]);
+                        }
                     }
+
+                    if (data.omr_meta_jsonb) {
+                        setStudentInfo({
+                            name: data.omr_meta_jsonb.studentName || "Chưa có tên",
+                            dob: data.omr_meta_jsonb.studentDob || "Chưa có"
+                        });
+                        if (typeof data.omr_meta_jsonb.studentCode === 'string') {
+                            setSheetMeta({
+                                code: data.omr_meta_jsonb.studentCode,
+                                round: String(data.omr_meta_jsonb.round ?? ''),
+                                issues: data.omr_meta_jsonb.issues || []
+                            });
+                        }
+                    }
+                } else {
+                    console.error("Fetch error: không đọc được dữ liệu bài kiểm tra");
                 }
-                
-                if (data.omr_meta_jsonb) {
-                    setStudentInfo({
-                        name: data.omr_meta_jsonb.studentName || "Chưa có tên",
-                        dob: data.omr_meta_jsonb.studentDob || "Chưa có"
-                    });
-                }
-            } else {
-                console.error("Fetch error", error);
-            }
-            setLoading(false);
-        });
+                setLoading(false);
+            })
+            .catch((err) => {
+                console.error("Fetch error", err);
+                setLoading(false);
+            });
     }, [id]);
 
     const handleFinalize = async () => {
         if (answers.length === 0) return;
+        const missing = answers.find(a => a.chon === null);
+        if (missing) {
+            alert(`Câu ${missing.cau} chưa có đáp án. Đối chiếu ảnh và chọn mức trước khi chốt.`);
+            return;
+        }
+        if (sheetMeta && (!/^\d{3}$/.test(sheetMeta.code) || !['1', '2'].includes(sheetMeta.round))) {
+            alert('Nhập Mã học sinh (3 chữ số) và chọn Lần khảo sát trước khi chốt.');
+            return;
+        }
         setIsFinalizing(true);
         try {
             const rawAnswers = answers.map(a => a.chon);
             const res = await fetch('/api/finalize', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ result_id: id, answers: rawAnswers })
+                body: JSON.stringify({
+                    result_id: id,
+                    answers: rawAnswers,
+                    ...(sheetMeta && { studentCode: sheetMeta.code, round: sheetMeta.round })
+                })
             });
             const data = await res.json();
             if (res.ok) {
@@ -146,12 +179,45 @@ export default function ReviewPage() {
                     </button>
                 </div>
                 
+                {sheetMeta && (
+                    <div className="mb-4 p-3 rounded-lg border border-indigo-100 bg-indigo-50 space-y-3">
+                        {sheetMeta.issues.length > 0 && (
+                            <ul className="text-xs text-amber-800 list-disc pl-4 space-y-0.5">
+                                {sheetMeta.issues.map((s, i) => <li key={i}>{s}</li>)}
+                            </ul>
+                        )}
+                        <div className="flex items-end gap-3">
+                            <label className="flex-1 text-sm font-medium text-slate-700">
+                                Mã học sinh
+                                <input
+                                    inputMode="numeric"
+                                    maxLength={3}
+                                    value={sheetMeta.code}
+                                    onChange={(e) => setSheetMeta({ ...sheetMeta, code: e.target.value.replace(/\D/g, '') })}
+                                    className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 tracking-widest bg-white"
+                                />
+                            </label>
+                            <div className="flex gap-2">
+                                {['1', '2'].map(r => (
+                                    <button
+                                        key={r}
+                                        onClick={() => setSheetMeta({ ...sheetMeta, round: r })}
+                                        className={`px-3 py-2 rounded-md border text-sm font-medium ${sheetMeta.round === r ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white border-gray-300 text-slate-700'}`}
+                                    >
+                                        Lần {r}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 <div className="flex-1 overflow-y-auto pr-2 space-y-3">
                     {answers.map((ans, idx) => (
                         <div key={idx} className={`p-3 rounded-lg border ${ans.flag ? 'border-amber-400 bg-amber-50' : 'border-gray-100 bg-slate-50'}`}>
                             <div className="flex items-center justify-between mb-3">
                                 <span className="font-bold text-slate-700">Câu {ans.cau}</span>
-                                {ans.flag && <span className="text-xs font-bold text-amber-700 bg-amber-200 px-2 py-1 rounded-md">Thiếu đáp án</span>}
+                                {ans.flag && <span className="text-xs font-bold text-amber-700 bg-amber-200 px-2 py-1 rounded-md">{ans.note}</span>}
                             </div>
                             <div className="flex justify-between">
                                 {[1, 2, 3, 4, 5].map(val => (

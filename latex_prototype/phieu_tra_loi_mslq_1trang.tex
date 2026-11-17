@@ -1,0 +1,253 @@
+% !TEX program = xelatex
+% Phiếu trả lời MSLQ 44 câu — 1 trang A4, chấm bằng OMR.
+% Dựng lại từ phiếu 40 câu Toán 9 (DLDGTGD/01_ACT_CaNhan/Bo_De_In_Phat_HS):
+% giữ nguyên 4 ô định vị, khung lưới 4 cột và vị trí khối mã số để tái dùng thuật toán OMR.
+%
+% TỌA ĐỘ OMR (cm, gốc = góc dưới trái trang A4):
+%   Ô định vị 6x6mm, tâm: TL (1.5,17.3)  TR (19.5,17.3)  BR (19.5,2.3)  BL (1.5,2.3)
+%   Câu q (1..44): col = (q-1) div 11, r = (q-1) mod 11
+%       tâm ô mức k (k = 1..5): x = 2.1 + col*4.25 + 1.10 + (k-1)*0.66
+%                               y = 15.9 - (r + 0.5)*13/11
+%   Mã học sinh, cột c (0..2), chữ số d (0..9): x = 11.895 + c*0.68, y = 24.85 - d*0.69
+%   Lần khảo sát: lần 1 tại (14.75, 24.5), lần 2 tại (14.75, 23.5)
+%   Bán kính ô tô: 1.8mm (đường kính 3.6mm)
+\documentclass[10pt,a4paper]{article}
+
+\usepackage[margin=0mm]{geometry}
+\usepackage{fontspec}
+\setmainfont{Arial}
+\setsansfont{Arial}
+
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{calc}
+
+\pagestyle{empty}
+
+\definecolor{ink}{HTML}{000000}
+\definecolor{darkgray}{HTML}{333333}
+\definecolor{midgray}{HTML}{666666}
+\definecolor{bubbletext}{HTML}{777777}
+\definecolor{zebrabg}{HTML}{EFEFEF}
+
+\begin{document}
+\begin{tikzpicture}[remember picture, overlay]
+  \coordinate (O) at (current page.south west);
+
+  % =========================================================================
+  % 1. HEADER (y = 27.1 .. 28.6)
+  % =========================================================================
+  \draw[line width=0.9pt, ink] ($(O)+(1.2cm, 27.1cm)$) rectangle ($(O)+(19.8cm, 28.6cm)$);
+  \fill[zebrabg] ($(O)+(1.22cm, 27.12cm)$) rectangle ($(O)+(8.6cm, 28.58cm)$);
+  \draw[line width=0.6pt, darkgray] ($(O)+(8.6cm, 27.1cm)$) -- ($(O)+(8.6cm, 28.6cm)$);
+
+  \node[anchor=center, align=center] at ($(O)+(4.9cm, 27.85cm)$) {%
+    {\footnotesize PHÒNG GD\&ĐT ...........................................}\\[2pt]
+    {\small\textbf{TRƯỜNG THCS ......................................}}
+  };
+
+  \node[anchor=center, align=center] at ($(O)+(14.2cm, 27.85cm)$) {%
+    {\fontsize{13.5}{16}\selectfont\textbf{PHIẾU TRẢ LỜI KHẢO SÁT}}\\[2pt]
+    {\footnotesize Động lực và chiến lược học môn \textbf{TOÁN 9} --- 44 câu, dùng kèm tập câu hỏi}
+  };
+
+  % =========================================================================
+  % 2A. THÔNG TIN HỌC SINH (x = 1.2 .. 11.1, y = 21.8 .. 26.8)
+  % =========================================================================
+  \draw[line width=0.8pt, ink] ($(O)+(1.2cm, 21.8cm)$) rectangle ($(O)+(11.1cm, 26.8cm)$);
+  \fill[ink] ($(O)+(1.2cm, 26.2cm)$) rectangle ($(O)+(11.1cm, 26.8cm)$);
+  \node[anchor=center, white] at ($(O)+(6.15cm, 26.5cm)$) {\small\textbf{THÔNG TIN HỌC SINH}};
+
+  \node[anchor=west] at ($(O)+(1.45cm, 25.65cm)$) {\small Họ và tên:};
+  \draw[dotted, line width=0.6pt] ($(O)+(3.25cm, 25.53cm)$) -- ($(O)+(10.85cm, 25.53cm)$);
+
+  \node[anchor=west] at ($(O)+(1.45cm, 24.92cm)$) {\small Lớp:};
+  \draw[dotted, line width=0.6pt] ($(O)+(2.25cm, 24.80cm)$) -- ($(O)+(4.4cm, 24.80cm)$);
+  \node[anchor=west] at ($(O)+(4.55cm, 24.92cm)$) {\small Trường THCS:};
+  \draw[dotted, line width=0.6pt] ($(O)+(6.95cm, 24.80cm)$) -- ($(O)+(10.85cm, 24.80cm)$);
+
+  \node[anchor=west] at ($(O)+(1.45cm, 24.19cm)$) {\small Ngày làm phiếu:};
+  \draw[dotted, line width=0.6pt] ($(O)+(4.0cm, 24.07cm)$) -- ($(O)+(6.4cm, 24.07cm)$);
+
+  % Lời cam kết (thay ô chữ ký)
+  \draw[line width=0.5pt, darkgray] ($(O)+(1.2cm, 23.6cm)$) -- ($(O)+(11.1cm, 23.6cm)$);
+  \node[anchor=north west, align=left, text width=9.5cm] at ($(O)+(1.35cm, 23.45cm)$) {%
+    {\footnotesize\textbf{Phiếu này KHÔNG tính điểm.}}\\[2pt]
+    {\scriptsize Không có câu trả lời đúng hay sai. Hãy chọn mức đúng nhất với bản thân em.
+     Kết quả chỉ dùng để thầy cô hiểu cách học của em và được giữ kín.}
+  };
+
+  % =========================================================================
+  % 2B. HƯỚNG DẪN CÁCH TÔ (x = 1.2 .. 11.1, y = 18.2 .. 21.5)
+  % =========================================================================
+  \draw[line width=0.8pt, ink] ($(O)+(1.2cm, 18.2cm)$) rectangle ($(O)+(11.1cm, 21.5cm)$);
+  \fill[zebrabg] ($(O)+(1.22cm, 20.92cm)$) rectangle ($(O)+(11.08cm, 21.48cm)$);
+  \draw[line width=0.5pt, darkgray] ($(O)+(1.2cm, 20.9cm)$) -- ($(O)+(11.1cm, 20.9cm)$);
+  \node[anchor=center] at ($(O)+(6.15cm, 21.2cm)$) {\footnotesize\textbf{HƯỚNG DẪN (Dùng bút chì 2B hoặc bút bi)}};
+
+  \node[anchor=north west, align=left, text width=9.5cm] at ($(O)+(1.35cm, 20.75cm)$) {%
+    {\scriptsize $\bullet$ Đọc từng câu trong \textbf{tập câu hỏi}, tô kín \textbf{01} ô mức đúng nhất với em.}\\[2pt]
+    {\scriptsize $\bullet$ Tô đủ \textbf{Mã học sinh} và \textbf{Lần khảo sát}. Không viết vào tập câu hỏi.}
+  };
+
+  \draw[line width=0.35pt, black!20] ($(O)+(1.35cm, 19.35cm)$) -- ($(O)+(10.95cm, 19.35cm)$);
+  \node[anchor=west] at ($(O)+(1.45cm, 18.75cm)$) {\footnotesize\textbf{Đúng:}};
+  \draw[line width=0.6pt, ink, fill=ink] ($(O)+(2.85cm, 18.75cm)$) circle (1.8mm);
+
+  \node[anchor=west] at ($(O)+(4.1cm, 18.75cm)$) {\footnotesize\textbf{Sai:}};
+  \draw[line width=0.6pt, ink] ($(O)+(5.15cm, 18.75cm)$) circle (1.8mm);
+  \draw[line width=0.8pt, ink] ($(O)+(5.02cm, 18.62cm)$) -- ($(O)+(5.28cm, 18.88cm)$);
+  \draw[line width=0.8pt, ink] ($(O)+(5.02cm, 18.88cm)$) -- ($(O)+(5.28cm, 18.62cm)$);
+  \draw[line width=0.6pt, ink] ($(O)+(6.25cm, 18.75cm)$) circle (1.8mm);
+  \draw[line width=0.8pt, ink] ($(O)+(6.13cm, 18.76cm)$) -- ($(O)+(6.23cm, 18.65cm)$) -- ($(O)+(6.38cm, 18.87cm)$);
+  \draw[line width=0.6pt, ink] ($(O)+(7.35cm, 18.75cm)$) circle (1.8mm);
+  \fill[ink] ($(O)+(7.35cm, 18.75cm)$) circle (0.7mm);
+  \draw[line width=0.6pt, ink] ($(O)+(8.45cm, 18.75cm)$) circle (1.8mm);
+  \draw[line width=0.8pt, ink] ($(O)+(8.25cm, 18.75cm)$) -- ($(O)+(8.65cm, 18.75cm)$);
+  \draw[line width=0.6pt, ink] ($(O)+(9.55cm, 18.75cm)$) circle (1.8mm);
+  \draw[line width=0.6pt, ink] ($(O)+(9.55cm, 18.75cm)$) circle (1.0mm);
+
+  % =========================================================================
+  % 3A. MÃ HỌC SINH — cùng tọa độ với khối Số báo danh của phiếu gốc
+  % =========================================================================
+  \draw[line width=0.8pt, ink] ($(O)+(11.4cm, 18.2cm)$) rectangle ($(O)+(13.75cm, 26.8cm)$);
+  \fill[ink] ($(O)+(11.4cm, 26.2cm)$) rectangle ($(O)+(13.75cm, 26.8cm)$);
+  \node[anchor=center, white] at ($(O)+(12.575cm, 26.5cm)$) {\footnotesize\textbf{MÃ HỌC SINH}};
+  \foreach \c in {0,1,2} {
+    \pgfmathsetmacro{\cx}{11.58 + \c*0.68}
+    \pgfmathsetmacro{\cxend}{\cx + 0.63}
+    \draw[line width=0.6pt, ink] ($(O)+(\cx cm, 25.38cm)$) rectangle ($(O)+(\cxend cm, 26.05cm)$);
+  }
+  \draw[line width=0.5pt, darkgray] ($(O)+(11.4cm, 25.25cm)$) -- ($(O)+(13.75cm, 25.25cm)$);
+  \foreach \d in {0,...,9} {
+    \pgfmathsetmacro{\dy}{24.85 - \d*0.69}
+    \foreach \c in {0,1,2} {
+      \pgfmathsetmacro{\cx}{11.895 + \c*0.68}
+      \draw[line width=0.5pt, darkgray] ($(O)+(\cx cm, \dy cm)$) circle (1.8mm);
+      \node[anchor=center, bubbletext] at ($(O)+(\cx cm, \dy cm)$) {\tiny\textbf{\d}};
+    }
+  }
+
+  % =========================================================================
+  % 3B. LẦN KHẢO SÁT (x = 14.0 .. 16.35)
+  % =========================================================================
+  \draw[line width=0.8pt, ink] ($(O)+(14.0cm, 18.2cm)$) rectangle ($(O)+(16.35cm, 26.8cm)$);
+  \fill[ink] ($(O)+(14.0cm, 26.2cm)$) rectangle ($(O)+(16.35cm, 26.8cm)$);
+  \node[anchor=center, white] at ($(O)+(15.175cm, 26.5cm)$) {\footnotesize\textbf{LẦN KHẢO SÁT}};
+  \node[anchor=center] at ($(O)+(15.175cm, 25.6cm)$) {\scriptsize\textit{(Tô 01 ô)}};
+  \draw[line width=0.5pt, darkgray] ($(O)+(14.0cm, 25.25cm)$) -- ($(O)+(16.35cm, 25.25cm)$);
+  \draw[line width=0.5pt, darkgray] ($(O)+(14.75cm, 24.5cm)$) circle (1.8mm);
+  \node[anchor=center, bubbletext] at ($(O)+(14.75cm, 24.5cm)$) {\scriptsize\textbf{1}};
+  \node[anchor=west] at ($(O)+(15.1cm, 24.5cm)$) {\footnotesize Lần 1};
+  \draw[line width=0.5pt, darkgray] ($(O)+(14.75cm, 23.5cm)$) circle (1.8mm);
+  \node[anchor=center, bubbletext] at ($(O)+(14.75cm, 23.5cm)$) {\scriptsize\textbf{2}};
+  \node[anchor=west] at ($(O)+(15.1cm, 23.5cm)$) {\footnotesize Lần 2};
+
+  \draw[line width=0.4pt, midgray] ($(O)+(14.0cm, 22.7cm)$) -- ($(O)+(16.35cm, 22.7cm)$);
+  \node[anchor=north, align=center, text width=2.1cm] at ($(O)+(15.175cm, 22.55cm)$) {%
+    {\scriptsize\textbf{Cách ghi mã}}\\[4pt]
+    {\tiny Số đầu = lớp}\\[2pt]
+    {\tiny 2 số sau = số thứ tự}\\[6pt]
+    {\tiny Ví dụ: lớp 1, số 07}\\[2pt]
+    {\scriptsize\textbf{→ 107}}
+  };
+
+  % =========================================================================
+  % 3C. THANG MỨC ĐỘ (x = 16.6 .. 19.8)
+  % =========================================================================
+  \draw[line width=0.8pt, ink] ($(O)+(16.6cm, 18.2cm)$) rectangle ($(O)+(19.8cm, 26.8cm)$);
+  \fill[ink] ($(O)+(16.6cm, 26.2cm)$) rectangle ($(O)+(19.8cm, 26.8cm)$);
+  \node[anchor=center, white] at ($(O)+(18.2cm, 26.5cm)$) {\footnotesize\textbf{THANG MỨC ĐỘ}};
+  \foreach \k/\lab/\sub [count=\i from 0] in {%
+      {1}/{Hoàn toàn không đúng}/{Gần như chưa bao giờ},%
+      {2}/{Không đúng}/{Thỉnh thoảng mới có},%
+      {3}/{Đúng một phần}/{Lúc đúng, lúc không},%
+      {4}/{Đúng}/{Phần lớn thời gian},%
+      {5}/{Hoàn toàn đúng}/{Gần như lúc nào cũng vậy}} {
+    \pgfmathsetmacro{\ky}{25.55 - \i*1.5}
+    \draw[line width=0.5pt, darkgray] ($(O)+(17.05cm, \ky cm)$) circle (2.25mm);
+    \node[anchor=center, ink] at ($(O)+(17.05cm, \ky cm)$) {\scriptsize\textbf{\k}};
+    \node[anchor=west, align=left, text width=2.3cm] at ($(O)+(17.4cm, \ky cm)$) {%
+      {\scriptsize\textbf{\lab}}\\[-1pt]{\tiny\color{midgray}\sub}};
+    \ifnum\i<4
+      \pgfmathsetmacro{\ly}{\ky - 0.75}
+      \draw[line width=0.3pt, black!25] ($(O)+(16.7cm, \ly cm)$) -- ($(O)+(19.7cm, \ly cm)$);
+    \fi
+  }
+
+  % =========================================================================
+  % 4. KHUNG TRẢ LỜI 44 CÂU x 5 MỨC (TỌA ĐỘ OMR)
+  %    Ô định vị và khung cột giữ nguyên như phiếu gốc.
+  % =========================================================================
+  \fill[ink] ($(O)+(1.2cm, 17.0cm)$) rectangle ($(O)+(1.8cm, 17.6cm)$);
+  \fill[ink] ($(O)+(19.2cm, 17.0cm)$) rectangle ($(O)+(19.8cm, 17.6cm)$);
+  \fill[ink] ($(O)+(1.2cm, 2.0cm)$)  rectangle ($(O)+(1.8cm, 2.6cm)$);
+  \fill[ink] ($(O)+(19.2cm, 2.0cm)$) rectangle ($(O)+(19.8cm, 2.6cm)$);
+
+  \node[anchor=center] at ($(O)+(10.5cm, 17.3cm)$) {\small\textbf{PHẦN TRẢ LỜI (MỖI CÂU TÔ KÍN 01 Ô THEO THANG 1--5)}};
+
+  \pgfmathsetmacro{\rh}{13/11}
+  \foreach \col in {0,1,2,3} {
+    \pgfmathsetmacro{\xstart}{2.1 + \col*4.25}
+    \pgfmathsetmacro{\xend}{\xstart + 4.05}
+    \pgfmathsetmacro{\xsep}{\xstart + 0.80}
+    \pgfmathsetmacro{\xqnum}{\xstart + 0.40}
+
+    \draw[line width=0.8pt, ink] ($(O)+(\xstart cm, 2.9cm)$) rectangle ($(O)+(\xend cm, 16.65cm)$);
+
+    \fill[ink] ($(O)+(\xstart cm, 15.9cm)$) rectangle ($(O)+(\xend cm, 16.65cm)$);
+    \node[anchor=center, white] at ($(O)+(\xqnum cm, 16.275cm)$) {\footnotesize\textbf{Câu}};
+    \foreach \idx in {0,...,4} {
+      \pgfmathsetmacro{\bx}{\xstart + 1.10 + \idx*0.66}
+      \pgfmathtruncatemacro{\lvl}{\idx + 1}
+      \node[anchor=center, white] at ($(O)+(\bx cm, 16.275cm)$) {\footnotesize\textbf{\lvl}};
+    }
+
+    \foreach \r in {0,...,10} {
+      \pgfmathtruncatemacro{\qnum}{\col*11 + \r + 1}
+      \pgfmathsetmacro{\rytop}{15.9 - \r*\rh}
+      \pgfmathsetmacro{\rybot}{\rytop - \rh}
+      \pgfmathsetmacro{\rymid}{\rytop - \rh/2}
+      \pgfmathsetmacro{\zleft}{\xstart + 0.02}
+      \pgfmathsetmacro{\zright}{\xend - 0.02}
+      \pgfmathsetmacro{\zbot}{\rybot + 0.01}
+      \pgfmathsetmacro{\ztop}{\rytop - 0.01}
+
+      \ifodd\r
+        \fill[zebrabg] ($(O)+(\zleft cm, \zbot cm)$) rectangle ($(O)+(\zright cm, \ztop cm)$);
+      \fi
+
+      \ifnum\r<10
+        \ifnum\r=4
+          \draw[line width=0.7pt, ink] ($(O)+(\xstart cm, \rybot cm)$) -- ($(O)+(\xend cm, \rybot cm)$);
+        \else
+          \ifnum\r=9
+            \draw[line width=0.7pt, ink] ($(O)+(\xstart cm, \rybot cm)$) -- ($(O)+(\xend cm, \rybot cm)$);
+          \else
+            \draw[line width=0.3pt, black!25] ($(O)+(\xstart cm, \rybot cm)$) -- ($(O)+(\xend cm, \rybot cm)$);
+          \fi
+        \fi
+      \fi
+
+      \node[anchor=center, ink] at ($(O)+(\xqnum cm, \rymid cm)$) {\small\textbf{\qnum}};
+
+      \foreach \idx in {0,...,4} {
+        \pgfmathsetmacro{\bx}{\xstart + 1.10 + \idx*0.66}
+        \pgfmathtruncatemacro{\lvl}{\idx + 1}
+        \draw[line width=0.55pt, darkgray] ($(O)+(\bx cm, \rymid cm)$) circle (1.8mm);
+        \node[anchor=center, bubbletext] at ($(O)+(\bx cm, \rymid cm)$) {\scriptsize\textbf{\lvl}};
+      }
+    }
+
+    \draw[line width=0.6pt, darkgray] ($(O)+(\xsep cm, 2.9cm)$) -- ($(O)+(\xsep cm, 15.9cm)$);
+  }
+
+  % =========================================================================
+  % 5. CHÂN TRANG
+  % =========================================================================
+  \node[anchor=center, midgray] at ($(O)+(10.5cm, 1.3cm)$) {%
+    \footnotesize\textit{Trước khi nộp: kiểm tra đã tô Mã học sinh, Lần khảo sát và đủ 44 câu.}%
+  };
+
+\end{tikzpicture}
+\end{document}
