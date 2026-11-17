@@ -1,19 +1,16 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseServer, describeDbError } from '@/lib/supabase/server';
 import { v4 as uuidv4 } from 'uuid';
 
 export const maxDuration = 60; // Allow max 60s execution time on Vercel
 
 const WORKER_URL = process.env.WORKER_URL || 'http://localhost:8000';
 const WORKER_SECRET = process.env.WORKER_SECRET || 'dev_secret';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://vocjtovsupecsfpzqzvk.supabase.co',
-  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZvY2p0b3ZzdXBlY3NmcHpxenZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE0OTkxMTMsImV4cCI6MjA5NzA3NTExM30.ZKtQMrF2YDKKMfeTFfbj89rKy9J1TJ2TYNG5_2e9SXI'
-);
+const UPLOAD_BUCKET = 'mslq-uploads';
 
 export async function POST(req: Request) {
     try {
+        const supabase = getSupabaseServer();
         const formData = await req.formData();
         const files = formData.getAll('files') as File[];
         const studentName = formData.get('studentName') as string || '';
@@ -51,13 +48,14 @@ export async function POST(req: Request) {
             // Upload lên Supabase để lưu ảnh gốc (chạy song song với worker)
             Promise.all(fileBuffers.map(async ({ file, buffer, safeName }) => {
                 const { error: uploadError } = await supabase.storage
-                    .from('mslq-uploads')
+                    .from(UPLOAD_BUCKET)
                     .upload(safeName, buffer, { contentType: file.type, upsert: true });
                 if (uploadError) {
-                    console.error("Supabase Storage Error:", uploadError);
-                    return null;
+                    console.error(`Supabase Storage Error (${file.name}):`, uploadError);
+                    return { url: null as string | null, fileName: file.name, reason: uploadError.message };
                 }
-                return supabase.storage.from('mslq-uploads').getPublicUrl(safeName).data.publicUrl;
+                const url = supabase.storage.from(UPLOAD_BUCKET).getPublicUrl(safeName).data.publicUrl;
+                return { url: url as string | null, fileName: file.name, reason: null as string | null };
             }))
         ]);
 
@@ -68,7 +66,14 @@ export async function POST(req: Request) {
         }
 
         const data = await workerRes.json();
-        const fileUrls = uploadResults.filter((url): url is string => url !== null);
+        const fileUrls = uploadResults.map(r => r.url).filter((url): url is string => url !== null);
+        const failedUploads = uploadResults.filter(r => r.url === null);
+        if (failedUploads.length > 0) {
+            console.error(
+                `Upload ảnh gốc thất bại ${failedUploads.length}/${uploadResults.length} tệp:`,
+                failedUploads.map(f => `${f.fileName}: ${f.reason}`).join('; ')
+            );
+        }
         
         if (!data.success) {
             return NextResponse.json({ error: data.error || 'Worker OMR failed to extract' }, { status: 400 });
@@ -89,13 +94,19 @@ export async function POST(req: Request) {
             });
 
         if (dbError) {
-            console.error("Supabase error:", dbError);
-            return NextResponse.json({ error: 'Database insert failed' }, { status: 500 });
+            console.error("Supabase insert error:", dbError);
+            return NextResponse.json(
+                { error: `Không lưu được kết quả vào database: ${describeDbError(dbError)}` },
+                { status: 500 }
+            );
         }
         
         return NextResponse.json({
             id: resultId,
-            data
+            data,
+            ...(failedUploads.length > 0 && {
+                photoWarning: `Không lưu được ${failedUploads.length}/${uploadResults.length} ảnh gốc lên storage. Kết quả chấm vẫn hợp lệ.`
+            })
         });
 
     } catch (e: unknown) {

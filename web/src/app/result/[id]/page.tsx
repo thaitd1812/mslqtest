@@ -1,15 +1,9 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import { createClient } from '@supabase/supabase-js';
 import { GROUPS } from '@/lib/mslq/groups';
 import { getTierFromAvg } from '@/lib/mslq/score';
 import { Loader2, Download, Copy, CheckCircle, AlertCircle } from 'lucide-react';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://vocjtovsupecsfpzqzvk.supabase.co',
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZvY2p0b3ZzdXBlY3NmcHpxenZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE0OTkxMTMsImV4cCI6MjA5NzA3NTExM30.ZKtQMrF2YDKKMfeTFfbj89rKy9J1TJ2TYNG5_2e9SXI'
-);
 
 const TIER_STYLE = [
     { bg: 'bg-red-50', border: 'border-red-200', badge: 'bg-red-100 text-red-800', bar: 'bg-red-400' },
@@ -40,12 +34,11 @@ export default function ResultPage() {
 
     useEffect(() => {
         if (!id) return;
-        supabase
-            .from('mslq_results')
-            .select('omr_meta_jsonb, scores_jsonb, report_pdf_url')
-            .eq('id', id)
-            .single()
-            .then(({ data }) => {
+        // Đi qua API route thay vì gọi thẳng Supabase: trình duyệt không còn giữ
+        // key nào đọc được database.
+        fetch(`/api/results/${id}`)
+            .then((res) => (res.ok ? res.json() : null))
+            .then((data) => {
                 if (data) {
                     setStudentInfo({
                         name: data.omr_meta_jsonb?.studentName || '',
@@ -57,7 +50,8 @@ export default function ResultPage() {
                     }
                 }
                 setPageLoading(false);
-            });
+            })
+            .catch(() => setPageLoading(false));
     }, [id]);
 
     // Auto-generate PDF after scores are loaded (if not already done)

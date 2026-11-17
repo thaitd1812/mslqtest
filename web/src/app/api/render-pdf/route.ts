@@ -1,19 +1,15 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseServer } from '@/lib/supabase/server';
 import { grade, buildReportPayload } from '@/lib/mslq/score';
 
 export const maxDuration = 60;
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://vocjtovsupecsfpzqzvk.supabase.co',
-  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZvY2p0b3ZzdXBlY3NmcHpxenZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE0OTkxMTMsImV4cCI6MjA5NzA3NTExM30.ZKtQMrF2YDKKMfeTFfbj89rKy9J1TJ2TYNG5_2e9SXI'
-);
 
 const WORKER_URL = process.env.WORKER_URL || 'http://localhost:8000';
 const WORKER_SECRET = process.env.WORKER_SECRET || 'dev_secret';
 
 export async function POST(req: Request) {
     try {
+        const supabase = getSupabaseServer();
         const { result_id } = await req.json();
 
         if (!result_id) {
